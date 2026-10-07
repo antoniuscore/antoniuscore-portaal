@@ -277,16 +277,10 @@ export default function ShopClient({
               Marktplein (Kraampjes)
             </Link>
             <Link
-              href="/dashboard"
+              href="/beheer"
               className="text-sm font-medium text-slate-300 hover:text-white transition"
             >
-              B2B Dashboard
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="text-sm font-medium text-slate-300 hover:text-white transition"
-            >
-              Instellingen
+              Mijn Profiel & Beheer
             </Link>
             <Link
               href="/api/auth/signin"

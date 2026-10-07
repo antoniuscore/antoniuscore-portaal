@@ -103,6 +103,8 @@ model Company {
   availableStaff            Int?                   @default(1)
   clientCapacityPerProduct   Int?                   @default(5)
   isMarketplaceVisible      Boolean                @default(true)
+  businessType              String?
+  googlePlaceId             String?
   recommendedCompanies      String[]               @default([])
   blacklistedCompanies      String[]               @default([])
   kvkNumber                 String?

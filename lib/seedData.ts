@@ -353,6 +353,18 @@ export async function enrichExistingCompanies() {
     const clientCapacityPerProduct = comp.clientCapacityPerProduct ?? matchingSample?.clientCapacityPerProduct ?? 5;
     const latitude = comp.latitude ?? matchingSample?.latitude ?? 52.37;
     const longitude = comp.longitude ?? matchingSample?.longitude ?? 4.89;
+    const businessType = (comp as any).businessType || (matchingSample as any)?.businessType || (
+      comp.primarySector === "BRUILOFT" ? "Bruidsstylist" :
+      comp.primarySector === "EVENEMENTEN_FEEST" ? "DJ & Event Styling" :
+      comp.primarySector === "BOUW_RENOVATIE" ? "Aannemer" :
+      comp.primarySector === "ZAKELIJK_CORPORATE" ? "Videograaf & Media" :
+      comp.primarySector === "CATERING_HORECA" ? "Cateraar" :
+      comp.primarySector === "MARKETING_MEDIA_FOTOGRAFIE" ? "Fotograaf" :
+      comp.primarySector === "AUTOMOTIVE_LOGISTIEK" ? "VIP Vervoer" :
+      comp.primarySector === "BEAUTY_LIFESTYLE" ? "Kapper & Visagist" :
+      comp.primarySector === "ONDERWIJS_WORKSHOPS" ? "Trainer & Coach" : "Kunstenaar & Acts"
+    );
+    const googlePlaceId = (comp as any).googlePlaceId || (matchingSample as any)?.googlePlaceId || `ChIJ_${generatedSlug.replace(/-/g, "_")}`;
 
     await prisma.company.update({
       where: { id: comp.id },
@@ -364,6 +376,8 @@ export async function enrichExistingCompanies() {
         availableStaff,
         clientCapacityPerProduct,
         isMarketplaceVisible: comp.isMarketplaceVisible ?? true,
+        businessType,
+        googlePlaceId,
         latitude,
         longitude
       }

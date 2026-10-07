@@ -55,6 +55,8 @@ export interface CompanyWithMarketData {
   websiteUrl: string | null;
   city: string | null;
   address: string | null;
+  businessType?: string | null;
+  googlePlaceId?: string | null;
   serviceRadiusKm: number | null;
   availableStaff: number | null;
   clientCapacityPerProduct: number | null;
@@ -90,7 +92,114 @@ interface Visitor {
   speed: number;
 }
 
-// 10 Sectoren met unieke, stijlvolle dakkleur combinaties (geen emojis)
+export type LanguageCode = "NL" | "EN" | "TI";
+
+const TRANSLATIONS: Record<
+  LanguageCode,
+  {
+    loginBtn: string;
+    beheerBtn: string;
+    cart: string;
+    activeVisitors: string;
+    openStalls: string;
+    reshuffle: string;
+    infiniteScrollOn: string;
+    infiniteScrollOff: string;
+    allSectors: string;
+    location: string;
+    allNetherlands: string;
+    maxRadius: string;
+    onlyOpen: string;
+    clearFilters: string;
+    noStallsTitle: string;
+    noStallsDesc: string;
+    showAllStalls: string;
+    top5Products: string;
+    bundles: string;
+    viewProfile: string;
+    combinedRequest: string;
+    sendInquiry: string;
+    emptyCart: string;
+  }
+> = {
+  NL: {
+    loginBtn: "Zakelijk Inloggen",
+    beheerBtn: "Mijn Profiel & Beheer",
+    cart: "Winkelmand",
+    activeVisitors: "Actieve bezoekers op markt",
+    openStalls: "actieve kraampjes geopend",
+    reshuffle: "Herverdeel Markt",
+    infiniteScrollOn: "Eindeloos Wandelen: Aan",
+    infiniteScrollOff: "Eindeloos Wandelen: Uit",
+    allSectors: "Alle Sectoren",
+    location: "Locatie",
+    allNetherlands: "Heel Nederland",
+    maxRadius: "Max Straal",
+    onlyOpen: "Alleen nu geopend",
+    clearFilters: "Filters wissen",
+    noStallsTitle: "Geen kraampjes gevonden",
+    noStallsDesc: "Er zijn geen geopende kraampjes die voldoen aan de filters. Pas de filters aan of herverdeel het plein.",
+    showAllStalls: "Toon alle kraampjes",
+    top5Products: "Top 5 Producten",
+    bundles: "Samenwerkingsbundels",
+    viewProfile: "Bekijk Profiel →",
+    combinedRequest: "GEOFROTEERDE AANVRAAG",
+    sendInquiry: "Verstuur Gecombineerde Aanvraag",
+    emptyCart: "Uw mandje is nog leeg.",
+  },
+  EN: {
+    loginBtn: "Business Login",
+    beheerBtn: "My Profile & Manage",
+    cart: "Cart",
+    activeVisitors: "Active market visitors",
+    openStalls: "active stalls open",
+    reshuffle: "Reshuffle Market",
+    infiniteScrollOn: "Endless Walk: ON",
+    infiniteScrollOff: "Endless Walk: OFF",
+    allSectors: "All Sectors",
+    location: "Location",
+    allNetherlands: "All Netherlands",
+    maxRadius: "Max Radius",
+    onlyOpen: "Open now only",
+    clearFilters: "Clear filters",
+    noStallsTitle: "No stalls found",
+    noStallsDesc: "No open stalls match your filter criteria. Adjust filters or reshuffle the market square.",
+    showAllStalls: "Show all stalls",
+    top5Products: "Top 5 Products",
+    bundles: "Collaboration Bundles",
+    viewProfile: "View Profile →",
+    combinedRequest: "COMBINED INQUIRY",
+    sendInquiry: "Send Combined Inquiry",
+    emptyCart: "Your cart is currently empty.",
+  },
+  TI: {
+    loginBtn: "ናይ ንግዲ ምእታው",
+    beheerBtn: "መገለጺይን ምሕደራን",
+    cart: "ጋሪ",
+    activeVisitors: "ንጡፋት በጻሕቲ ዕዳጋ",
+    openStalls: "ክፉታት ድኳናት",
+    reshuffle: "ዕዳጋ ዳግማይ ኣዳልው",
+    infiniteScrollOn: "ዘየቋርጽ ምጉዓዝ: በርሀ",
+    infiniteScrollOff: "ዘየቋርጽ ምጉዓዝ: ጥፍአ",
+    allSectors: "ኩሎም ዓውድታት",
+    location: "ቦታ",
+    allNetherlands: "ኩሉ ኔዘርላንድ",
+    maxRadius: "ዝለዓለ ርሕቀት",
+    onlyOpen: "ሕጂ ክፉታት ጥራይ",
+    clearFilters: "መጽረዪታት ደምስስ",
+    noStallsTitle: "ዝተረኽበ ድኳን የለን",
+    noStallsDesc: "በዚ መጽረዪ ዝተረኽበ ድኳን የለን። መጽረዪታት ቀይር ወይ ዳግማይ ጀምር።",
+    showAllStalls: "ኩሎም ድኳናት ኣርእይ",
+    top5Products: "ቀዳሞት 5 ፍርያት",
+    bundles: "ናይ ምትሕብባር ጥሙራት",
+    viewProfile: "መገለጺ ርአ →",
+    combinedRequest: "ዝተወሃሃደ ጠለብ",
+    sendInquiry: "ዝተወሃሃደ ሕቶ ስደድ",
+    emptyCart: "ጋሪኻ ጥራይ እዩ ዘሎ።",
+  },
+};
+
+// 10 Sectoren met unieke, stijlvolle dakkleur combinaties (Geen emojis)
 export const SECTOR_THEMES: Record<
   SectorType,
   {
@@ -104,80 +213,80 @@ export const SECTOR_THEMES: Record<
 > = {
   BRUILOFT: {
     label: "Bruiloft",
-    roofColor1: "#7c3aed", // Paars
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#7c3aed",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-purple-800",
     badgeBg: "bg-purple-900 text-purple-100",
   },
   EVENEMENTEN_FEEST: {
     label: "Feest",
-    roofColor1: "#dc2626", // Rood
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#dc2626",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-red-800",
     badgeBg: "bg-red-900 text-red-100",
   },
   BOUW_RENOVATIE: {
     label: "Bouw",
-    roofColor1: "#78350f", // Eikenhout
-    roofColor2: "#451a03", // Donker hout
+    roofColor1: "#78350f",
+    roofColor2: "#451a03",
     isWood: true,
     borderCol: "border-amber-950",
     badgeBg: "bg-amber-950 text-amber-100",
   },
   ZAKELIJK_CORPORATE: {
     label: "Zakelijk",
-    roofColor1: "#1d4ed8", // Blauw
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#1d4ed8",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-blue-900",
     badgeBg: "bg-blue-900 text-blue-100",
   },
   CATERING_HORECA: {
     label: "Catering",
-    roofColor1: "#15803d", // Bosgroen
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#15803d",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-emerald-900",
     badgeBg: "bg-emerald-950 text-emerald-100",
   },
   MARKETING_MEDIA_FOTOGRAFIE: {
     label: "Marketing & Media",
-    roofColor1: "#c2410c", // Koper-oranje
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#c2410c",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-orange-950",
     badgeBg: "bg-orange-950 text-orange-100",
   },
   AUTOMOTIVE_LOGISTIEK: {
     label: "Automotive & Transport",
-    roofColor1: "#334155", // Antraciet
-    roofColor2: "#94a3b8", // Zilver
+    roofColor1: "#334155",
+    roofColor2: "#94a3b8",
     isWood: false,
     borderCol: "border-slate-900",
     badgeBg: "bg-slate-900 text-slate-100",
   },
   BEAUTY_LIFESTYLE: {
     label: "Beauty & Lifestyle",
-    roofColor1: "#db2777", // Framboos / Roze
-    roofColor2: "#ffffff", // Wit
+    roofColor1: "#db2777",
+    roofColor2: "#ffffff",
     isWood: false,
     borderCol: "border-pink-950",
     badgeBg: "bg-pink-950 text-pink-100",
   },
   ONDERWIJS_WORKSHOPS: {
     label: "Onderwijs & Training",
-    roofColor1: "#d97706", // Amber
-    roofColor2: "#fef3c7", // Crème
+    roofColor1: "#d97706",
+    roofColor2: "#fef3c7",
     isWood: false,
     borderCol: "border-amber-900",
     badgeBg: "bg-amber-900 text-amber-100",
   },
   KUNST_ENTERTAINMENT: {
     label: "Kunst & Acts",
-    roofColor1: "#581c87", // Dieppaars
-    roofColor2: "#facc15", // Warm goud
+    roofColor1: "#581c87",
+    roofColor2: "#facc15",
     isWood: false,
     borderCol: "border-purple-950",
     badgeBg: "bg-purple-950 text-purple-100",
@@ -221,6 +330,10 @@ export default function StardewMarket({
   userName?: string | null;
 }) {
   const router = useRouter();
+
+  // Language State: NL | EN | TI
+  const [lang, setLang] = useState<LanguageCode>("NL");
+  const t = TRANSLATIONS[lang];
 
   // Filters State
   const [selectedSector, setSelectedSector] = useState<SectorType | "ALL">("ALL");
@@ -311,9 +424,8 @@ export default function StardewMarket({
       const batchShuffled = seededShuffle(shuffledCompanies, activeSeed + batch * 31);
       batchShuffled.forEach((comp, idx) => {
         const itemSeed = activeSeed + batch * 1000 + idx * 77;
-        // Organic natural jitter so stalls don't sit on a rigid sterile line
-        const organicOffsetX = Math.round((seededRandom(itemSeed) - 0.5) * 28);
-        const organicOffsetY = Math.round((seededRandom(itemSeed + 1) - 0.5) * 24);
+        const organicOffsetX = Math.round((seededRandom(itemSeed) - 0.5) * 24);
+        const organicOffsetY = Math.round((seededRandom(itemSeed + 1) - 0.5) * 20);
 
         list.push({
           ...comp,
@@ -458,7 +570,7 @@ export default function StardewMarket({
     try {
       const companyIds = Array.from(new Set(cart.map((i) => i.companyId)));
       const itemsList = cart.map((i) => `• ${i.name} (€${i.price}) bij ${i.companyName}`).join("\n");
-      const fullNotes = `Gecombineerde aanvraag voor ${cart.length} producten/diensten:\n${itemsList}\n\nOpmerkingen:\n${requestNotes}`;
+      const fullNotes = `Gecombineerde aanvraag voor ${cart.length} diensten/producten:\n${itemsList}\n\nOpmerkingen:\n${requestNotes}`;
 
       const res = await fetch("/api/requests", {
         method: "POST",
@@ -512,224 +624,251 @@ export default function StardewMarket({
 
   return (
     <div className="min-h-screen bg-desert-market text-[#2d1808] flex flex-col font-sans select-none relative overflow-x-hidden">
-      {/* 1. Header: Logo Links Boven, Zakelijk Inloggen Midden, Mandje Rechts */}
-      <header className="bg-[#cca440] border-b-4 border-[#4a2810] px-4 py-2.5 shadow-lg sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {/* Logo Links Boven -> https://www.antoniuscore.com (target="_blank") */}
-          <a
-            href="https://www.antoniuscore.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pixel-btn-wood px-3.5 py-2 rounded text-xs font-black tracking-wider uppercase flex items-center gap-2 hover:opacity-95 transition shrink-0"
-          >
-            <span className="font-mono text-xs sm:text-sm tracking-widest text-[#fcd34d]">
-              ANTONIUSCORE
-            </span>
-            <span className="text-[10px] text-[#edd378] border-l border-[#c57b42] pl-2 font-semibold hidden sm:inline">
-              PORTAL
-            </span>
-          </a>
-
-          {/* Exact Midden: Opvallende Rode Knop "Zakelijk Inloggen" */}
-          <div className="flex-1 flex justify-center">
-            {isLoggedIn ? (
-              <Link
-                href="/dashboard"
-                className="pixel-btn-red px-4 sm:px-6 py-2 rounded text-xs font-black tracking-wider uppercase shadow-md transition"
-              >
-                Dashboard ({userName ? userName.split(" ")[0] : "Zakelijk"})
-              </Link>
-            ) : (
-              <Link
-                href="/api/auth/signin"
-                className="pixel-btn-red px-5 sm:px-8 py-2.5 rounded text-xs sm:text-sm font-black tracking-widest uppercase shadow-xl hover:scale-105 transition"
-              >
-                Zakelijk Inloggen
-              </Link>
-            )}
-          </div>
-
-          {/* Rechts: Mandje & Profiel Knop */}
-          <div className="flex items-center gap-2 shrink-0">
-            {isLoggedIn && (
-              <Link
-                href="/dashboard/profile"
-                className="pixel-btn-wood px-3 py-2 rounded text-xs font-bold hidden md:inline-block"
-              >
-                Mijn Profiel
-              </Link>
-            )}
-
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="pixel-btn-gold px-3.5 py-2 rounded text-xs font-bold flex items-center gap-2 relative cursor-pointer"
+      {/* STICKY NAVIGATIE BALK (Blijft sticky meescrollen bij 'Eindeloos Wandelen') */}
+      <div className="sticky top-0 z-40 bg-[#cca440] shadow-xl border-b-4 border-[#4a2810]">
+        {/* 1. Hoofd Header: Logo Links, Midden Rode Knop, Rechts Talen & Mandje */}
+        <header className="px-3 sm:px-6 py-2.5">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            {/* Logo Links: 'AntoniusCore' (linkt direct naar https://www.antoniuscore.com) */}
+            <a
+              href="https://www.antoniuscore.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pixel-btn-wood px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-black tracking-wider uppercase flex items-center gap-1.5 hover:opacity-95 transition shrink-0"
             >
-              <span>Winkelmand</span>
-              {cart.length > 0 && (
-                <span className="bg-[#dc2626] text-white text-[10px] font-black rounded-full px-1.5 py-0.2 border border-[#450a0a]">
-                  {cart.length}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+              <span className="font-mono text-xs sm:text-base tracking-widest text-[#fcd34d]">
+                AntoniusCore
+              </span>
+            </a>
 
-      {/* 2. Marktplein Status Bar & Controls */}
-      <div className="bg-[#edd378]/90 border-b-2 border-[#7c481f] px-4 py-2 text-xs">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          {/* Live Visitor Indicator */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 font-semibold text-[#4a2810]">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
+            {/* Exact Midden: Opvallende Rode Knop "Zakelijk Inloggen" of "Mijn Profiel & Beheer" */}
+            <div className="flex-1 flex justify-center">
+              {isLoggedIn ? (
+                <Link
+                  href="/beheer"
+                  className="pixel-btn-red px-3 sm:px-6 py-2 rounded text-[11px] sm:text-xs font-black tracking-wider uppercase shadow-md transition text-center"
+                >
+                  {t.beheerBtn} ({userName ? userName.split(" ")[0] : ""})
+                </Link>
+              ) : (
+                <Link
+                  href="/api/auth/signin"
+                  className="pixel-btn-red px-4 sm:px-8 py-2 sm:py-2.5 rounded text-xs sm:text-sm font-black tracking-widest uppercase shadow-xl hover:scale-105 transition text-center"
+                >
+                  {t.loginBtn}
+                </Link>
+              )}
+            </div>
+
+            {/* Rechts: Talen Selector & Mandje */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Talen Selector (NL / EN / TI) */}
+              <div className="bg-[#b38827] border-2 border-[#4a2810] rounded p-0.5 flex items-center gap-0.5 text-[11px] font-black">
+                <button
+                  onClick={() => setLang("NL")}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
+                    lang === "NL"
+                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
+                      : "text-[#fffbf2] hover:text-[#fcd34d]"
+                  }`}
+                  title="Nederlands"
+                >
+                  NL
+                </button>
+                <button
+                  onClick={() => setLang("EN")}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
+                    lang === "EN"
+                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
+                      : "text-[#fffbf2] hover:text-[#fcd34d]"
+                  }`}
+                  title="English"
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLang("TI")}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
+                    lang === "TI"
+                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
+                      : "text-[#fffbf2] hover:text-[#fcd34d]"
+                  }`}
+                  title="ትግርኛ (Tigrinya)"
+                >
+                  TI
+                </button>
+              </div>
+
+              {/* Winkelmand */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="pixel-btn-gold px-3 py-2 rounded text-xs font-bold flex items-center gap-1.5 relative cursor-pointer"
+              >
+                <span className="hidden sm:inline">{t.cart}</span>
+                <span className="sm:hidden font-mono font-black">🛒</span>
+                {cart.length > 0 && (
+                  <span className="bg-[#dc2626] text-white text-[10px] font-black rounded-full px-1.5 py-0.2 border border-[#450a0a]">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* 2. Status & Controls Ticker */}
+        <div className="bg-[#edd378] border-t border-b-2 border-[#7c481f] px-3 sm:px-6 py-1.5 text-xs">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+            {/* Live Indicator */}
+            <div className="flex items-center gap-2 font-semibold text-[#4a2810] text-[11px] sm:text-xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse shrink-0" />
               <span>
-                Actieve bezoekers op markt:{" "}
+                {t.activeVisitors}:{" "}
                 <strong className="font-mono text-emerald-900">{activeSessionCount}</strong>
               </span>
+              <span className="text-[#8a4b1f] hidden sm:inline">•</span>
+              <span className="text-[#63320f] font-medium hidden sm:inline">
+                {filteredCompanies.length} {t.openStalls}
+              </span>
             </div>
-            <span className="text-[#8a4b1f] hidden sm:inline">•</span>
-            <span className="text-[#63320f] font-medium hidden sm:inline">
-              {filteredCompanies.length} actieve kraampjes geopend
-            </span>
-          </div>
 
-          {/* Randomize Knop & Infinite Scroll Toggle */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShuffleSalt((prev) => prev + 1)}
-              className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold hover:brightness-105 transition cursor-pointer"
-            >
-              Herverdeel Markt
-            </button>
-
-            <button
-              onClick={() => {
-                setIsInfiniteScroll(!isInfiniteScroll);
-                setInfiniteBatchCount(1);
-              }}
-              className={`px-3 py-1.5 rounded text-xs font-bold border transition cursor-pointer ${
-                isInfiniteScroll
-                  ? "bg-emerald-700 text-white border-emerald-950 shadow"
-                  : "pixel-btn-wood text-[#fffbf2]"
-              }`}
-            >
-              {isInfiniteScroll ? "Eindeloos Wandelen: Aan" : "Eindeloos Wandelen: Uit"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Filter Bar: Sectoren, Stad, Straal, Nu Geopend */}
-      <div className="bg-[#edd378]/70 border-b-2 border-[#7c481f]/40 px-4 py-3">
-        <div className="max-w-7xl mx-auto space-y-3">
-          {/* 10 Sectoren Knoppen (Geen emojis, strakke badges met sector-kleur indicator) */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              onClick={() => setSelectedSector("ALL")}
-              className={`px-3 py-1.5 rounded text-xs font-bold transition border cursor-pointer ${
-                selectedSector === "ALL"
-                  ? "pixel-btn-gold"
-                  : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
-              }`}
-            >
-              Alle Sectoren ({companies.length})
-            </button>
-
-            {(Object.keys(SECTOR_THEMES) as SectorType[]).map((st) => {
-              const meta = SECTOR_THEMES[st];
-              const isSelected = selectedSector === st;
-              const count = companies.filter((c) => c.primarySector === st && c.isMarketplaceVisible !== false).length;
-
-              return (
-                <button
-                  key={st}
-                  onClick={() => setSelectedSector(st)}
-                  className={`px-3 py-1.5 rounded text-xs font-bold transition border flex items-center gap-2 cursor-pointer ${
-                    isSelected
-                      ? "pixel-btn-wood"
-                      : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
-                  }`}
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/20"
-                    style={{ backgroundColor: meta.roofColor1 }}
-                  />
-                  <span>
-                    {meta.label} ({count})
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Secundaire Filters: Stad, Leveringsstraal, Nu Geopend */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[#4a2810] pt-1">
-            {/* Stad filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold">Locatie:</span>
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="bg-[#fff4d4] border border-[#7c481f] rounded px-2.5 py-1 text-xs font-semibold focus:outline-none"
+            {/* Randomize Knop & Infinite Scroll Toggle */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                onClick={() => setShuffleSalt((prev) => prev + 1)}
+                className="pixel-btn-wood px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold hover:brightness-105 transition cursor-pointer"
               >
-                <option value="ALL">Heel Nederland</option>
-                {uniqueCities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {t.reshuffle}
+              </button>
 
-            {/* Straal filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold">Max Straal:</span>
-              <select
-                value={maxRadiusKm}
-                onChange={(e) => setMaxRadiusKm(Number(e.target.value))}
-                className="bg-[#fff4d4] border border-[#7c481f] rounded px-2.5 py-1 text-xs font-semibold focus:outline-none"
-              >
-                <option value={25}>Binnen 25 km</option>
-                <option value={50}>Binnen 50 km</option>
-                <option value={100}>Binnen 100 km</option>
-                <option value={200}>Alle afstanden</option>
-              </select>
-            </div>
-
-            {/* Nu Geopend filter */}
-            <label className="flex items-center gap-2 cursor-pointer font-bold select-none">
-              <input
-                type="checkbox"
-                checked={onlyOpenNow}
-                onChange={(e) => setOnlyOpenNow(e.target.checked)}
-                className="accent-[#dc2626] w-3.5 h-3.5"
-              />
-              <span>Alleen nu geopend</span>
-            </label>
-
-            {(selectedSector !== "ALL" || selectedCity !== "ALL" || onlyOpenNow) && (
               <button
                 onClick={() => {
-                  setSelectedSector("ALL");
-                  setSelectedCity("ALL");
-                  setOnlyOpenNow(false);
-                  setMaxRadiusKm(100);
+                  setIsInfiniteScroll(!isInfiniteScroll);
+                  setInfiniteBatchCount(1);
                 }}
-                className="text-xs text-[#8a4b1f] hover:text-[#3b1d09] font-bold underline cursor-pointer ml-auto"
+                className={`px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold border transition cursor-pointer ${
+                  isInfiniteScroll
+                    ? "bg-emerald-700 text-white border-emerald-950 shadow"
+                    : "pixel-btn-wood text-[#fffbf2]"
+                }`}
               >
-                Filters wissen
+                {isInfiniteScroll ? t.infiniteScrollOn : t.infiniteScrollOff}
               </button>
-            )}
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Filter Bar: 10 Sectoren + Subfilters (Sticky samen met header) */}
+        <div className="bg-[#edd378]/90 px-3 sm:px-6 py-2.5">
+          <div className="max-w-7xl mx-auto space-y-2">
+            {/* 10 Sectoren Knoppen */}
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 overflow-x-auto pb-0.5">
+              <button
+                onClick={() => setSelectedSector("ALL")}
+                className={`px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold transition border cursor-pointer whitespace-nowrap ${
+                  selectedSector === "ALL"
+                    ? "pixel-btn-gold"
+                    : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
+                }`}
+              >
+                {t.allSectors} ({companies.length})
+              </button>
+
+              {(Object.keys(SECTOR_THEMES) as SectorType[]).map((st) => {
+                const meta = SECTOR_THEMES[st];
+                const isSelected = selectedSector === st;
+                const count = companies.filter(
+                  (c) => c.primarySector === st && c.isMarketplaceVisible !== false
+                ).length;
+
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setSelectedSector(st)}
+                    className={`px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold transition border flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                      isSelected
+                        ? "pixel-btn-wood"
+                        : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
+                    }`}
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/25"
+                      style={{ backgroundColor: meta.roofColor1 }}
+                    />
+                    <span>
+                      {meta.label} ({count})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Locatie, Straal & Nu Geopend */}
+            <div className="flex flex-wrap items-center gap-3 text-[11px] sm:text-xs font-medium text-[#4a2810]">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold">{t.location}:</span>
+                <select
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="bg-[#fff4d4] border border-[#7c481f] rounded px-2 py-0.5 text-xs font-semibold focus:outline-none"
+                >
+                  <option value="ALL">{t.allNetherlands}</option>
+                  {uniqueCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold">{t.maxRadius}:</span>
+                <select
+                  value={maxRadiusKm}
+                  onChange={(e) => setMaxRadiusKm(Number(e.target.value))}
+                  className="bg-[#fff4d4] border border-[#7c481f] rounded px-2 py-0.5 text-xs font-semibold focus:outline-none"
+                >
+                  <option value={25}>25 km</option>
+                  <option value={50}>50 km</option>
+                  <option value={100}>100 km</option>
+                  <option value={200}>Alle afstanden</option>
+                </select>
+              </div>
+
+              <label className="flex items-center gap-1.5 cursor-pointer font-bold select-none">
+                <input
+                  type="checkbox"
+                  checked={onlyOpenNow}
+                  onChange={(e) => setOnlyOpenNow(e.target.checked)}
+                  className="accent-[#dc2626] w-3.5 h-3.5"
+                />
+                <span>{t.onlyOpen}</span>
+              </label>
+
+              {(selectedSector !== "ALL" || selectedCity !== "ALL" || onlyOpenNow) && (
+                <button
+                  onClick={() => {
+                    setSelectedSector("ALL");
+                    setSelectedCity("ALL");
+                    setOnlyOpenNow(false);
+                    setMaxRadiusKm(100);
+                  }}
+                  className="text-[#8a4b1f] hover:text-[#3b1d09] font-bold underline cursor-pointer ml-auto"
+                >
+                  {t.clearFilters}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Het Centrale 2D Marktplein Veld */}
-      <main className="flex-1 relative p-6 sm:p-10 max-w-7xl mx-auto w-full">
-        {/* Subtiel Marktplein Courtyard / Cobblestone Area */}
-        <div className="absolute inset-4 sm:inset-8 market-cobblestone rounded-2xl pointer-events-none opacity-40 border border-[#7c481f]/20" />
+      {/* 4. Centrale 2D Marktplein Veld */}
+      <main className="flex-1 relative p-4 sm:p-8 max-w-7xl mx-auto w-full">
+        {/* Subtiel Marktplein Cobblestone Binnenplaats Achtergrond */}
+        <div className="absolute inset-2 sm:inset-6 market-cobblestone rounded-2xl pointer-events-none opacity-30 border border-[#7c481f]/20" />
 
-        {/* Dynamische Live Bezoekers Poppetjes (Zonder tekstballon emojis) */}
+        {/* Dynamische Live Bezoekers Poppetjes */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
           {visitors.map((v) => (
             <div
@@ -741,21 +880,20 @@ export default function StardewMarket({
                 transform: `translate(-50%, -50%) ${v.facing === "left" ? "scaleX(-1)" : "scaleX(1)"}`,
               }}
             >
-              {/* Pixel Art Miniatuur Bezoeker */}
               <div className="relative w-6 h-8 flex flex-col items-center">
                 {/* Hoedje */}
                 <div
                   className="w-4 h-2 rounded-t-sm shadow-xs border border-black/30"
                   style={{ backgroundColor: v.hatColor }}
                 />
-                {/* Hoofdje */}
+                {/* Gezicht */}
                 <div className="w-3.5 h-2.5 bg-[#f5d0a9] border-x border-black/20" />
-                {/* Kleding / Lichaam */}
+                {/* Tuniek/Lichaam */}
                 <div
                   className="w-4 h-3.5 rounded-b-xs border border-black/30 shadow-xs"
                   style={{ backgroundColor: v.color }}
                 />
-                {/* Voetjes */}
+                {/* Schoenen */}
                 <div className="w-3.5 h-1 flex justify-between">
                   <div className="w-1.5 h-1 bg-[#2d1808] rounded-xs" />
                   <div className="w-1.5 h-1 bg-[#2d1808] rounded-xs" />
@@ -765,14 +903,14 @@ export default function StardewMarket({
           ))}
         </div>
 
-        {/* Kraampjes Raster: Natuurlijk & Organisch Verspreid met Voldoende Tussenruimte */}
+        {/* Kraampjes Grid: Geen truncate op bedrijfsnaam, Bedrijfstype op de voorkant! */}
         {displayedStalls.length === 0 ? (
           <div className="relative z-10 text-center py-24 space-y-3">
             <h3 className="font-mono font-black text-xl text-[#4a2810]">
-              Geen kraampjes gevonden
+              {t.noStallsTitle}
             </h3>
             <p className="text-xs text-[#7c481f] max-w-md mx-auto">
-              Er zijn geen geopende kraampjes die voldoen aan de geselecteerde filters. Pas je filters aan of herverdeel het plein.
+              {t.noStallsDesc}
             </p>
             <button
               onClick={() => {
@@ -782,17 +920,40 @@ export default function StardewMarket({
               }}
               className="pixel-btn-wood px-4 py-2 rounded text-xs font-bold"
             >
-              Toon alle kraampjes
+              {t.showAllStalls}
             </button>
           </div>
         ) : (
-          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-12 sm:gap-x-12 sm:gap-y-16 justify-items-center py-6">
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12 sm:gap-x-10 sm:gap-y-16 justify-items-center py-6">
             {displayedStalls.map((company, index) => {
               const theme = SECTOR_THEMES[company.primarySector] || SECTOR_THEMES.ZAKELIJK_CORPORATE;
               const isOpen = checkIsOpenNow(company);
               const key = (company as any).instanceKey || `${company.id}-${index}`;
               const offsetX = (company as any).organicOffsetX || 0;
               const offsetY = (company as any).organicOffsetY || 0;
+
+              // Bedrijfstype voor op de houten toonbank (bijv. Fotograaf, Kapper, Aannemer)
+              const displayBusinessType =
+                company.businessType?.trim() ||
+                (company.primarySector === "BRUILOFT"
+                  ? "Bruidsstylist"
+                  : company.primarySector === "EVENEMENTEN_FEEST"
+                  ? "Event Styling"
+                  : company.primarySector === "BOUW_RENOVATIE"
+                  ? "Aannemer"
+                  : company.primarySector === "ZAKELIJK_CORPORATE"
+                  ? "Media & Stand"
+                  : company.primarySector === "CATERING_HORECA"
+                  ? "Cateraar"
+                  : company.primarySector === "MARKETING_MEDIA_FOTOGRAFIE"
+                  ? "Fotograaf"
+                  : company.primarySector === "AUTOMOTIVE_LOGISTIEK"
+                  ? "VIP Vervoer"
+                  : company.primarySector === "BEAUTY_LIFESTYLE"
+                  ? "Visagist & Kapper"
+                  : company.primarySector === "ONDERWIJS_WORKSHOPS"
+                  ? "Trainer & Coach"
+                  : "Kunst & Acts");
 
               return (
                 <div
@@ -803,15 +964,15 @@ export default function StardewMarket({
                   style={{
                     transform: `translate(${offsetX}px, ${offsetY}px)`,
                   }}
-                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-40"
+                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-44"
                 >
-                  {/* Boven het kraampje: Volledige Bedrijfsnaam (Strak, duidelijk leesbaar) */}
-                  <div className="text-center font-bold text-[11px] sm:text-xs text-[#2d1808] leading-tight max-w-[130px] sm:max-w-[145px] truncate mb-1 px-1 bg-[#fff8e7]/80 rounded border border-[#7c481f]/30 shadow-xs">
+                  {/* BOVEN HET KRAAMPJE: Volledige Bedrijfsnaam ALTIJD GOED LEESBAAR (geen afkapping / no truncate) */}
+                  <div className="w-full text-center font-bold text-[11px] sm:text-xs text-[#2d1808] leading-tight mb-1.5 px-2 py-1 bg-[#fff8e7] rounded border-2 border-[#4a2810] shadow-sm whitespace-normal break-words min-h-[34px] flex items-center justify-center">
                     {company.name}
                   </div>
 
-                  {/* 2D Pixel Art Kraampje (Compact & Stijlvol) */}
-                  <div className="relative w-28 sm:w-32 flex flex-col items-center">
+                  {/* 2D PIXEL ART KRAAMPJE */}
+                  <div className="relative w-30 sm:w-34 flex flex-col items-center">
                     {/* Luifel / Dakje: Sector Gekleurde Strepen / Hout */}
                     <div
                       className={`w-full h-8 sm:h-9 rounded-t-md border-3 ${theme.borderCol} shadow-md overflow-hidden relative`}
@@ -821,7 +982,7 @@ export default function StardewMarket({
                           : `repeating-linear-gradient(90deg, ${theme.roofColor1}, ${theme.roofColor1} 11px, ${theme.roofColor2} 11px, ${theme.roofColor2} 22px)`,
                       }}
                     >
-                      {/* Subtiel golfje / geschulpt randje onderaan de luifel */}
+                      {/* Golfjes onderaan de luifel */}
                       <div className="absolute bottom-0 inset-x-0 h-1.5 bg-black/15 flex justify-between">
                         <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
                         <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
@@ -834,11 +995,11 @@ export default function StardewMarket({
                       <div className="w-4 h-4 rounded-full bg-[#fcd34d] border border-[#78350f] shadow-xs" />
                     </div>
 
-                    {/* Toonbank / Basis van het Kraampje */}
-                    <div className="w-full h-9 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md p-1 flex flex-col items-center justify-between">
-                      {/* In/op het kraampje: Strak de Plaatsnaam */}
-                      <div className="w-full text-center text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate">
-                        {company.city || "Nederland"}
+                    {/* Houten Toonbank / Basis van het Kraampje */}
+                    <div className="w-full h-10 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md p-1 flex flex-col items-center justify-between">
+                      {/* OP DE VOORKANT: HET BEDRIJFSTYPE (Plaatsnaam verwijderd!) */}
+                      <div className="w-full text-center text-[9px] sm:text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate border border-[#78350f]">
+                        {displayBusinessType}
                       </div>
 
                       {/* Status & Catalogus indicator */}
@@ -850,6 +1011,7 @@ export default function StardewMarket({
                           className={`w-2 h-2 rounded-full ${
                             isOpen ? "bg-emerald-600 shadow-[0_0_5px_#16a34a]" : "bg-rose-600"
                           }`}
+                          title={isOpen ? "Nu Geopend" : "Nu Gesloten"}
                         />
                       </div>
                     </div>
@@ -871,7 +1033,7 @@ export default function StardewMarket({
         )}
       </main>
 
-      {/* 5. Hover Popup: Enkel Top 5 Producten & 5 Afgesproken Bundels (Geen emojis) */}
+      {/* 5. Hover Popup: Enkel Top 5 Producten & 5 Afgesproken Bundels */}
       {hoveredCompany && popupPos && (
         <div
           className="fixed z-50 pointer-events-auto transform -translate-x-1/2 -translate-y-full mb-3 animate-in fade-in zoom-in-95 duration-150"
@@ -887,7 +1049,7 @@ export default function StardewMarket({
             <div className="border-b border-[#7c481f] pb-2 flex items-start justify-between gap-2">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-[#8a4b1f] block">
-                  {SECTOR_THEMES[hoveredCompany.primarySector]?.label || hoveredCompany.primarySector} • {hoveredCompany.city || "Nederland"}
+                  {hoveredCompany.businessType || SECTOR_THEMES[hoveredCompany.primarySector]?.label} • {hoveredCompany.city || "Nederland"}
                 </span>
                 <h4 className="font-mono font-black text-sm text-[#3b1d09] leading-tight">
                   {hoveredCompany.name}
@@ -901,7 +1063,7 @@ export default function StardewMarket({
             {/* Top 5 Producten */}
             <div>
               <div className="text-[10px] font-black uppercase text-[#4a2810] tracking-wider mb-1">
-                Top 5 Producten:
+                {t.top5Products}:
               </div>
               <div className="space-y-1">
                 {hoveredCompany.products.slice(0, 5).map((prod) => (
@@ -943,7 +1105,7 @@ export default function StardewMarket({
             {hoveredCompany.bundles.length > 0 && (
               <div>
                 <div className="text-[10px] font-black uppercase text-[#5b21b6] tracking-wider mb-1">
-                  Samenwerkingsbundels:
+                  {t.bundles}:
                 </div>
                 <div className="space-y-1">
                   {hoveredCompany.bundles.slice(0, 5).map(({ bundle }) => (
@@ -985,7 +1147,7 @@ export default function StardewMarket({
             {/* Footer van Pop-up met doorklik hint */}
             <div className="pt-1.5 border-t border-[#7c481f]/30 flex items-center justify-between text-[10px] text-[#7c481f] font-semibold">
               <span>Klik voor bedrijfspagina</span>
-              <span className="text-[#8a4b1f] font-bold">Bekijk Profiel →</span>
+              <span className="text-[#8a4b1f] font-bold">{t.viewProfile}</span>
             </div>
           </div>
         </div>
@@ -1003,10 +1165,10 @@ export default function StardewMarket({
               <div className="flex items-center justify-between pb-4 border-b-2 border-[#7c481f] mb-4">
                 <div>
                   <h3 className="font-mono font-black text-lg text-[#3b1d09]">
-                    GEOFROTEERDE AANVRAAG
+                    {t.combinedRequest}
                   </h3>
                   <p className="text-xs text-[#7c481f]">
-                    Verzamel diensten van meerdere marktpartijen in één aanvraag.
+                    Verzamel diensten van meerdere marktpartijen in één gecombineerde aanvraag.
                   </p>
                 </div>
                 <button
@@ -1020,7 +1182,7 @@ export default function StardewMarket({
               {/* Items List */}
               {cart.length === 0 ? (
                 <div className="text-center py-12 text-[#7c481f] text-xs">
-                  <p className="font-bold mb-1">Uw mandje is nog leeg.</p>
+                  <p className="font-bold mb-1">{t.emptyCart}</p>
                   <p>Beweeg over een kraampje en voeg diensten of bundels toe.</p>
                 </div>
               ) : (
@@ -1054,7 +1216,7 @@ export default function StardewMarket({
                     ))}
                   </div>
 
-                  {/* Betrokken Partners Overzicht */}
+                  {/* Betrokken Bedrijven Overzicht */}
                   <div className="p-3 bg-[#edd378]/60 rounded border border-[#7c481f] text-xs">
                     <span className="font-bold text-[#4a2810] block mb-1">
                       Betrokken bedrijven ({uniqueCompaniesInCart.length}):
@@ -1128,7 +1290,7 @@ export default function StardewMarket({
                         disabled={isSubmitting}
                         className="pixel-btn-red w-full py-3 rounded text-xs font-black uppercase tracking-wider transition disabled:opacity-50 cursor-pointer shadow-lg"
                       >
-                        {isSubmitting ? "Aanvraag verzenden..." : "Verstuur Gecombineerde Aanvraag"}
+                        {isSubmitting ? "Aanvraag verzenden..." : t.sendInquiry}
                       </button>
                     </form>
                   )}
@@ -1138,7 +1300,7 @@ export default function StardewMarket({
 
             {/* Mandje Footer */}
             <div className="pt-4 border-t border-[#7c481f]/30 text-[10px] text-[#7c481f] text-center">
-              AntoniusCore B2B2C Marktplein • Geen directe betaling, enkel vrijblijvende aanvragen.
+              AntoniusCore B2B2C Marktplein • Vrijblijvende gecombineerde aanvragen.
             </div>
           </div>
         </div>
