@@ -31,6 +31,7 @@ interface ProfileClientProps {
     serviceRadiusKm: number | null;
     availableStaff: number | null;
     clientCapacityPerProduct: number | null;
+    isMarketplaceVisible?: boolean;
     recommendedCompanies: string[];
     blacklistedCompanies: string[];
     openingHours: OpeningHourItem[];
@@ -53,6 +54,9 @@ export default function ProfileClient({
   initialCompany,
   otherCompanies,
 }: ProfileClientProps) {
+  const [isMarketplaceVisible, setIsMarketplaceVisible] = useState<boolean>(
+    initialCompany.isMarketplaceVisible ?? true
+  );
   const [city, setCity] = useState(initialCompany.city || "");
   const [address, setAddress] = useState(initialCompany.address || "");
   const [websiteUrl, setWebsiteUrl] = useState(initialCompany.websiteUrl || "");
@@ -109,7 +113,6 @@ export default function ProfileClient({
     setRecommendedCompanies((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-    // Remove from blacklist if present
     setBlacklistedCompanies((prev) => prev.filter((item) => item !== id));
   };
 
@@ -117,7 +120,6 @@ export default function ProfileClient({
     setBlacklistedCompanies((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-    // Remove from recommended if present
     setRecommendedCompanies((prev) => prev.filter((item) => item !== id));
   };
 
@@ -132,6 +134,7 @@ export default function ProfileClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          isMarketplaceVisible,
           city,
           address,
           websiteUrl,
@@ -157,38 +160,36 @@ export default function ProfileClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#e4c158] text-[#2d1808] p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#dfbc53] text-[#2d1808] p-4 sm:p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Top Header */}
         <div className="pixel-box-parchment p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🏢</span>
-              <span className="text-xs font-black uppercase text-[#8a4b1f] tracking-wider">
+              <span className="text-[10px] font-black uppercase text-[#8a4b1f] tracking-widest bg-[#edd378] px-2 py-0.5 rounded border border-[#7c481f]">
                 B2B Partner Portaal
               </span>
             </div>
             <h1 className="font-mono font-black text-2xl text-[#3b1d09]">
-              {initialCompany.name} • Profiel & Capaciteit
+              {initialCompany.name} • Bedrijfsprofiel & Capaciteit
             </h1>
             <p className="text-xs text-[#63320f] mt-1 font-medium">
-              Beheer je locatie, servicegebied, openingstijden, personeel en voorkeurspartners.
+              Beheer marktpleinstatus, vestigingslocatie, openingstijden en klantcapaciteit.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <Link
               href={initialCompany.slug ? `/bedrijf/${initialCompany.slug}` : "/"}
-              className="pixel-btn-wood px-3.5 py-2 rounded text-xs font-bold flex items-center gap-1.5"
+              className="pixel-btn-wood px-3.5 py-2 rounded text-xs font-bold"
             >
-              <span>👁️</span>
-              <span>Bekijk Publieke Pagina</span>
+              Bekijk Publieke Pagina
             </Link>
             <Link
               href="/dashboard"
               className="pixel-btn-wood px-3.5 py-2 rounded text-xs font-bold"
             >
-              ← Dashboard
+              Dashboard
             </Link>
           </div>
         </div>
@@ -196,23 +197,57 @@ export default function ProfileClient({
         {/* Success / Error Banners */}
         {saveSuccess && (
           <div className="p-4 rounded bg-emerald-100 border-2 border-emerald-600 text-emerald-900 font-bold text-xs flex items-center gap-2 animate-in fade-in">
-            <span>✅</span>
-            <span>Jouw bedrijfsprofiel en instellingen zijn succesvol opgeslagen!</span>
+            <span>Succes:</span>
+            <span>Jouw bedrijfsprofiel en instellingen zijn succesvol opgeslagen.</span>
           </div>
         )}
 
         {errorMessage && (
           <div className="p-4 rounded bg-rose-100 border-2 border-rose-600 text-rose-900 font-bold text-xs flex items-center gap-2">
-            <span>⚠️</span>
+            <span>Fout:</span>
             <span>{errorMessage}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section 0: Kraampje Zichtbaarheid op Marktplein */}
+          <div className="pixel-box-wood p-5 bg-[#fff8e7] rounded">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-mono font-black text-sm uppercase text-[#4a2810]">
+                  Kraampje Zichtbaarheid op het Marktplein
+                </h2>
+                <p className="text-xs text-[#7c481f] mt-1 max-w-xl">
+                  Schakel in om jouw kraam direct op de homepage te tonen. Als jouw kraam op &apos;Dicht&apos;
+                  staat, verschijnt hij niet op het centrale marktplein, maar blijft je bedrijfspagina
+                  altijd direct bereikbaar via de eigen link.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <span className={`text-xs font-black uppercase ${isMarketplaceVisible ? "text-emerald-700" : "text-rose-700"}`}>
+                  {isMarketplaceVisible ? "Kraam is Open" : "Kraam is Dicht"}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMarketplaceVisible(!isMarketplaceVisible)}
+                  className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out border-2 ${
+                    isMarketplaceVisible
+                      ? "bg-emerald-600 border-emerald-900 justify-end"
+                      : "bg-slate-400 border-slate-700 justify-start"
+                  }`}
+                >
+                  <span className="w-5 h-5 rounded-full bg-white shadow-md transform transition-transform" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Section 1: Locatie & Leveringsgebied */}
           <div className="pixel-box-wood p-5 bg-[#fff8e7] rounded">
-            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3 flex items-center gap-2">
-              <span>📍</span> 1. Locatie & Leveringsgebied
+            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3">
+              1. Locatie & Leveringsgebied
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -283,8 +318,8 @@ export default function ProfileClient({
 
           {/* Section 2: Personeel & Klantcapaciteit */}
           <div className="pixel-box-wood p-5 bg-[#fff8e7] rounded">
-            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3 flex items-center gap-2">
-              <span>👥</span> 2. Personeel & Capaciteit
+            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3">
+              2. Personeel & Capaciteit
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -326,8 +361,8 @@ export default function ProfileClient({
 
           {/* Section 3: Openingstijden */}
           <div className="pixel-box-wood p-5 bg-[#fff8e7] rounded">
-            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3 flex items-center gap-2">
-              <span>⏰</span> 3. Openingstijden (Live Marktfilter)
+            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3">
+              3. Openingstijden (Live Marktfilter)
             </h2>
 
             <div className="space-y-2 text-xs">
@@ -390,8 +425,8 @@ export default function ProfileClient({
 
           {/* Section 4: Aanbevolen & Afgeraden Partners */}
           <div className="pixel-box-wood p-5 bg-[#fff8e7] rounded">
-            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2 flex items-center gap-2">
-              <span>🤝</span> 4. Voorkeurspartners & Filterbeleid
+            <h2 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2">
+              4. Voorkeurspartners & Filterbeleid
             </h2>
             <p className="text-xs text-[#7c481f] mb-4">
               Geef aan welke partnerbedrijven op het marktplein je actief aanbeveelt aan je klanten,
@@ -430,7 +465,7 @@ export default function ProfileClient({
                               : "bg-[#fff8e7] text-emerald-800 border-emerald-500 hover:bg-emerald-50"
                           }`}
                         >
-                          {isRec ? "★ Aanbevolen" : "+ Aanbevelen"}
+                          {isRec ? "Aanbevolen" : "+ Aanbevelen"}
                         </button>
 
                         <button
@@ -442,7 +477,7 @@ export default function ProfileClient({
                               : "bg-[#fff8e7] text-rose-800 border-rose-400 hover:bg-rose-50"
                           }`}
                         >
-                          {isBlack ? "✕ Afgeraden" : "✕ Niet koppelen"}
+                          {isBlack ? "Niet koppelen" : "Niet koppelen"}
                         </button>
                       </div>
                     </div>
@@ -459,7 +494,7 @@ export default function ProfileClient({
               disabled={isSaving}
               className="pixel-btn-red px-8 py-3 rounded text-sm font-black tracking-wider uppercase transition disabled:opacity-50 cursor-pointer shadow-xl"
             >
-              {isSaving ? "Gegevens Opslaan..." : "💾 Wijzigingen Opslaan"}
+              {isSaving ? "Gegevens Opslaan..." : "Wijzigingen Opslaan"}
             </button>
           </div>
         </form>

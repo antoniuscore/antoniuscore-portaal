@@ -58,6 +58,7 @@ export interface CompanyWithMarketData {
   serviceRadiusKm: number | null;
   availableStaff: number | null;
   clientCapacityPerProduct: number | null;
+  isMarketplaceVisible?: boolean;
   primarySector: SectorType;
   openForSectors: SectorType[];
   products: ProductItem[];
@@ -79,25 +80,21 @@ interface CartItem {
 
 interface Visitor {
   id: number;
-  name: string;
   x: number;
   y: number;
   targetX: number;
   targetY: number;
   color: string;
   hatColor: string;
-  bubble: string | null;
   facing: "left" | "right" | "down" | "up";
   speed: number;
 }
 
-// Uniek gekleurde daken per SectorType:
-// Bruiloft = Paars/Wit, Feest = Rood/Wit, Bouw = Hout/Bruin, Zakelijk = Blauw/Wit, Catering = Groen/Wit
-const SECTOR_THEMES: Record<
+// 10 Sectoren met unieke, stijlvolle dakkleur combinaties (geen emojis)
+export const SECTOR_THEMES: Record<
   SectorType,
   {
     label: string;
-    icon: string;
     roofColor1: string;
     roofColor2: string;
     isWood: boolean;
@@ -107,8 +104,7 @@ const SECTOR_THEMES: Record<
 > = {
   BRUILOFT: {
     label: "Bruiloft",
-    icon: "💒",
-    roofColor1: "#9333ea", // Paars
+    roofColor1: "#7c3aed", // Paars
     roofColor2: "#ffffff", // Wit
     isWood: false,
     borderCol: "border-purple-800",
@@ -116,7 +112,6 @@ const SECTOR_THEMES: Record<
   },
   EVENEMENTEN_FEEST: {
     label: "Feest",
-    icon: "🎉",
     roofColor1: "#dc2626", // Rood
     roofColor2: "#ffffff", // Wit
     isWood: false,
@@ -125,8 +120,7 @@ const SECTOR_THEMES: Record<
   },
   BOUW_RENOVATIE: {
     label: "Bouw",
-    icon: "🔨",
-    roofColor1: "#78350f", // Hout / Bruin
+    roofColor1: "#78350f", // Eikenhout
     roofColor2: "#451a03", // Donker hout
     isWood: true,
     borderCol: "border-amber-950",
@@ -134,8 +128,7 @@ const SECTOR_THEMES: Record<
   },
   ZAKELIJK_CORPORATE: {
     label: "Zakelijk",
-    icon: "💼",
-    roofColor1: "#2563eb", // Blauw
+    roofColor1: "#1d4ed8", // Blauw
     roofColor2: "#ffffff", // Wit
     isWood: false,
     borderCol: "border-blue-900",
@@ -143,22 +136,53 @@ const SECTOR_THEMES: Record<
   },
   CATERING_HORECA: {
     label: "Catering",
-    icon: "🍽️",
-    roofColor1: "#16a34a", // Groen
+    roofColor1: "#15803d", // Bosgroen
     roofColor2: "#ffffff", // Wit
     isWood: false,
     borderCol: "border-emerald-900",
     badgeBg: "bg-emerald-950 text-emerald-100",
   },
+  MARKETING_MEDIA_FOTOGRAFIE: {
+    label: "Marketing & Media",
+    roofColor1: "#c2410c", // Koper-oranje
+    roofColor2: "#ffffff", // Wit
+    isWood: false,
+    borderCol: "border-orange-950",
+    badgeBg: "bg-orange-950 text-orange-100",
+  },
+  AUTOMOTIVE_LOGISTIEK: {
+    label: "Automotive & Transport",
+    roofColor1: "#334155", // Antraciet
+    roofColor2: "#94a3b8", // Zilver
+    isWood: false,
+    borderCol: "border-slate-900",
+    badgeBg: "bg-slate-900 text-slate-100",
+  },
+  BEAUTY_LIFESTYLE: {
+    label: "Beauty & Lifestyle",
+    roofColor1: "#db2777", // Framboos / Roze
+    roofColor2: "#ffffff", // Wit
+    isWood: false,
+    borderCol: "border-pink-950",
+    badgeBg: "bg-pink-950 text-pink-100",
+  },
+  ONDERWIJS_WORKSHOPS: {
+    label: "Onderwijs & Training",
+    roofColor1: "#d97706", // Amber
+    roofColor2: "#fef3c7", // Crème
+    isWood: false,
+    borderCol: "border-amber-900",
+    badgeBg: "bg-amber-900 text-amber-100",
+  },
+  KUNST_ENTERTAINMENT: {
+    label: "Kunst & Acts",
+    roofColor1: "#581c87", // Dieppaars
+    roofColor2: "#facc15", // Warm goud
+    isWood: false,
+    borderCol: "border-purple-950",
+    badgeBg: "bg-purple-950 text-purple-100",
+  },
 };
-
-const BUBBLE_EMOJIS = ["💭", "✨", "🍰", "💍", "🎉", "🔨", "⭐", "🍷", "🎵", "📷"];
-
-// Simple seeded pseudo-random number generator for hourly fair shuffle
-function getHourlySeed() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}`;
-}
 
 function stringToSeed(str: string): number {
   let hash = 0;
@@ -167,6 +191,11 @@ function stringToSeed(str: string): number {
     hash |= 0;
   }
   return Math.abs(hash);
+}
+
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
 }
 
 function seededShuffle<T>(array: T[], seedNumber: number): T[] {
@@ -199,283 +228,346 @@ export default function StardewMarket({
   const [maxRadiusKm, setMaxRadiusKm] = useState<number>(100);
   const [onlyOpenNow, setOnlyOpenNow] = useState<boolean>(false);
 
-  // Hover state for compact popup
+  // Randomize & Infinite Scroll State
+  const [shuffleSalt, setShuffleSalt] = useState<number>(1);
+  const [isInfiniteScroll, setIsInfiniteScroll] = useState<boolean>(false);
+  const [infiniteBatchCount, setInfiniteBatchCount] = useState<number>(1);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // Cart & Hover Popup State
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [hoveredCompany, setHoveredCompany] = useState<CompanyWithMarketData | null>(null);
-  const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Cart / Boodschappenmandje State
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  // Combined Request Modal
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [customerName, setCustomerName] = useState<string>("");
+  const [customerEmail, setCustomerEmail] = useState<string>("");
+  const [requestNotes, setRequestNotes] = useState<string>("");
+  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
-  // Live walking visitor NPCs
-  const [visitors, setVisitors] = useState<Visitor[]>([
-    { id: 1, name: "Emily", x: 15, y: 30, targetX: 35, targetY: 45, color: "#3b82f6", hatColor: "#fbbf24", bubble: "💍", facing: "right", speed: 0.15 },
-    { id: 2, name: "Sam", x: 75, y: 25, targetX: 60, targetY: 55, color: "#10b981", hatColor: "#ef4444", bubble: "🎵", facing: "down", speed: 0.18 },
-    { id: 3, name: "Leah", x: 30, y: 65, targetX: 45, targetY: 35, color: "#8b5cf6", hatColor: "#60a5fa", bubble: "✨", facing: "left", speed: 0.12 },
-    { id: 4, name: "Harvey", x: 80, y: 55, targetX: 65, targetY: 35, color: "#d97706", hatColor: "#34d399", bubble: "🍰", facing: "up", speed: 0.14 },
-    { id: 5, name: "Penny", x: 20, y: 75, targetX: 50, targetY: 70, color: "#ec4899", hatColor: "#f59e0b", bubble: "🔨", facing: "right", speed: 0.16 },
-    { id: 6, name: "Alex", x: 50, y: 20, targetX: 25, targetY: 40, color: "#14b8a6", hatColor: "#8b5cf6", bubble: "⭐", facing: "left", speed: 0.17 },
-  ]);
+  // Dynamic Live Visitors Scaling
+  const [activeSessionCount, setActiveSessionCount] = useState<number>(14);
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
 
-  // Hourly random shuffle to prevent priority
-  const currentSeed = useMemo(() => stringToSeed(getHourlySeed()), []);
-  const shuffledCompanies = useMemo(() => {
-    return seededShuffle(companies, currentSeed);
-  }, [companies, currentSeed]);
-
-  // Extract unique cities from companies
-  const availableCities = useMemo(() => {
+  // Unique Cities list for filter
+  const uniqueCities = useMemo(() => {
     const set = new Set<string>();
     companies.forEach((c) => {
-      if (c.city) set.add(c.city);
+      if (c.city && c.city.trim().length > 0) {
+        set.add(c.city.trim());
+      }
     });
     return Array.from(set).sort();
   }, [companies]);
 
-  // Check if a company is currently open based on OpeningHours
-  const isCompanyOpen = (company: CompanyWithMarketData): boolean => {
+  // Real-time "Nu Geopend" checker
+  const checkIsOpenNow = (company: CompanyWithMarketData): boolean => {
     if (!company.openingHours || company.openingHours.length === 0) return true;
     const now = new Date();
     const currentDay = now.getDay();
-    const currentTime =
+    const currentHours =
       now.getHours().toString().padStart(2, "0") +
       ":" +
       now.getMinutes().toString().padStart(2, "0");
 
     const todayHour = company.openingHours.find((oh) => oh.dayOfWeek === currentDay);
     if (!todayHour || todayHour.isClosed) return false;
-    return currentTime >= todayHour.openTime && currentTime <= todayHour.closeTime;
+    return currentHours >= todayHour.openTime && currentHours <= todayHour.closeTime;
   };
 
-  // Filtered companies based on Sector, City, Radius and Open status
+  // Filter companies
   const filteredCompanies = useMemo(() => {
-    return shuffledCompanies.filter((company) => {
-      // Sector filter
-      if (selectedSector !== "ALL" && company.primarySector !== selectedSector) {
-        return false;
-      }
-      // City filter
-      if (selectedCity !== "ALL" && company.city !== selectedCity) {
-        return false;
-      }
-      // Radius filter
-      if (company.serviceRadiusKm && company.serviceRadiusKm < maxRadiusKm) {
-        // Keeps companies whose delivery reach covers at least maxRadiusKm, or fits within radius
-      }
-      // Nu Geopend filter
-      if (onlyOpenNow && !isCompanyOpen(company)) {
-        return false;
-      }
+    return companies.filter((c) => {
+      if (c.isMarketplaceVisible === false) return false;
+      if (selectedSector !== "ALL" && c.primarySector !== selectedSector) return false;
+      if (selectedCity !== "ALL" && c.city !== selectedCity) return false;
+      if (c.serviceRadiusKm && c.serviceRadiusKm > maxRadiusKm) return false;
+      if (onlyOpenNow && !checkIsOpenNow(c)) return false;
       return true;
     });
-  }, [shuffledCompanies, selectedSector, selectedCity, maxRadiusKm, onlyOpenNow]);
+  }, [companies, selectedSector, selectedCity, maxRadiusKm, onlyOpenNow]);
 
-  // Visitor autonomous walk loop
+  // Deterministic seed based on hour + manual shuffle salt
+  const activeSeed = useMemo(() => {
+    const d = new Date();
+    const hourlyStr = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}-salt-${shuffleSalt}`;
+    return stringToSeed(hourlyStr);
+  }, [shuffleSalt]);
+
+  // Shuffled base list of companies
+  const shuffledCompanies = useMemo(() => {
+    return seededShuffle(filteredCompanies, activeSeed);
+  }, [filteredCompanies, activeSeed]);
+
+  // Displayed stalls: single batch or repeated batches if infinite scroll is on
+  const displayedStalls = useMemo(() => {
+    if (shuffledCompanies.length === 0) return [];
+    if (!isInfiniteScroll) return shuffledCompanies;
+
+    const list: (CompanyWithMarketData & { instanceKey: string; organicOffsetX: number; organicOffsetY: number })[] = [];
+    for (let batch = 0; batch < infiniteBatchCount; batch++) {
+      const batchShuffled = seededShuffle(shuffledCompanies, activeSeed + batch * 31);
+      batchShuffled.forEach((comp, idx) => {
+        const itemSeed = activeSeed + batch * 1000 + idx * 77;
+        // Organic natural jitter so stalls don't sit on a rigid sterile line
+        const organicOffsetX = Math.round((seededRandom(itemSeed) - 0.5) * 28);
+        const organicOffsetY = Math.round((seededRandom(itemSeed + 1) - 0.5) * 24);
+
+        list.push({
+          ...comp,
+          instanceKey: `${comp.id}-batch-${batch}-${idx}`,
+          organicOffsetX,
+          organicOffsetY,
+        });
+      });
+    }
+    return list;
+  }, [shuffledCompanies, isInfiniteScroll, infiniteBatchCount, activeSeed]);
+
+  // Infinite Scroll Intersection Observer
+  useEffect(() => {
+    if (!isInfiniteScroll) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setInfiniteBatchCount((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isInfiniteScroll]);
+
+  // Dynamic Live Visitor Count simulation
   useEffect(() => {
     const interval = setInterval(() => {
+      setActiveSessionCount((prev) => {
+        const delta = Math.random() > 0.5 ? 1 : -1;
+        const next = prev + delta;
+        return Math.max(8, Math.min(26, next));
+      });
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update animated visitors array to match dynamic visitor count
+  useEffect(() => {
+    const colors = ["#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed", "#475569", "#be185d"];
+    const hatColors = ["#f59e0b", "#475569", "#0f172a", "#b45309", "#047857", "#9333ea"];
+
+    setVisitors((prev) => {
+      const updated: Visitor[] = [...prev];
+      while (updated.length < activeSessionCount) {
+        const id = updated.length + 1;
+        const color = colors[id % colors.length];
+        const hatColor = hatColors[id % hatColors.length];
+        const x = 5 + Math.random() * 85;
+        const y = 8 + Math.random() * 82;
+        updated.push({
+          id,
+          x,
+          y,
+          targetX: 5 + Math.random() * 85,
+          targetY: 8 + Math.random() * 82,
+          color,
+          hatColor,
+          facing: "down",
+          speed: 0.35 + Math.random() * 0.45,
+        });
+      }
+      if (updated.length > activeSessionCount) {
+        return updated.slice(0, activeSessionCount);
+      }
+      return updated;
+    });
+  }, [activeSessionCount]);
+
+  // Animate visitors stepping between paths
+  useEffect(() => {
+    const timer = setInterval(() => {
       setVisitors((prev) =>
-        prev.map((vis) => {
-          const dx = vis.targetX - vis.x;
-          const dy = vis.targetY - vis.y;
+        prev.map((v) => {
+          const dx = v.targetX - v.x;
+          const dy = v.targetY - v.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 1.5) {
-            const newTargetX = 10 + Math.random() * 80;
-            const newTargetY = 15 + Math.random() * 70;
-            const newBubble =
-              Math.random() > 0.45
-                ? BUBBLE_EMOJIS[Math.floor(Math.random() * BUBBLE_EMOJIS.length)]
-                : null;
             return {
-              ...vis,
-              targetX: newTargetX,
-              targetY: newTargetY,
-              bubble: newBubble,
+              ...v,
+              targetX: 5 + Math.random() * 85,
+              targetY: 8 + Math.random() * 82,
+              facing: Math.random() > 0.5 ? "left" : "right",
             };
           }
 
-          const moveX = (dx / dist) * vis.speed;
-          const moveY = (dy / dist) * vis.speed;
-          const facing =
-            Math.abs(dx) > Math.abs(dy)
-              ? dx > 0
-                ? "right"
-                : "left"
-              : dy > 0
-              ? "down"
-              : "up";
+          const stepX = (dx / dist) * v.speed;
+          const stepY = (dy / dist) * v.speed;
+          let facing = v.facing;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            facing = dx > 0 ? "right" : "left";
+          } else {
+            facing = dy > 0 ? "down" : "up";
+          }
 
           return {
-            ...vis,
-            x: vis.x + moveX,
-            y: vis.y + moveY,
+            ...v,
+            x: v.x + stepX,
+            y: v.y + stepY,
             facing,
           };
         })
       );
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
 
   // Cart operations
-  const addToCart = (
-    product: ProductItem,
-    company: CompanyWithMarketData,
-    e?: React.MouseEvent
-  ) => {
-    if (e) e.stopPropagation();
-    const item: CartItem = {
-      id: `${company.id}-${product.id}`,
-      name: product.name,
-      price: product.price,
-      companyId: company.id,
-      companyName: company.name,
-      type: "product",
-      sector: company.primarySector,
-    };
-    setCartItems((prev) => [...prev, item]);
-    setIsCartOpen(true);
-  };
-
-  const addBundleToCart = (
-    bundle: BundleItemDetail,
-    company: CompanyWithMarketData,
-    e?: React.MouseEvent
-  ) => {
-    if (e) e.stopPropagation();
-    const item: CartItem = {
-      id: `bundle-${bundle.id}`,
-      name: `Bundel: ${bundle.title}`,
-      price: bundle.price,
-      companyId: company.id,
-      companyName: company.name,
-      type: "bundle",
-      sector: bundle.sector,
-    };
-    setCartItems((prev) => [...prev, item]);
-    setIsCartOpen(true);
+  const addToCart = (e: React.MouseEvent, item: CartItem) => {
+    e.stopPropagation();
+    setCart((prev) => [...prev, item]);
   };
 
   const removeFromCart = (index: number) => {
-    setCartItems((prev) => prev.filter((_, i) => i !== index));
+    setCart((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // Submit Bulk CustomRequest
-  const handleBulkRequestSubmit = async (e: React.FormEvent) => {
+  const cartTotal = useMemo(() => {
+    return cart.reduce((acc, curr) => acc + curr.price, 0);
+  }, [cart]);
+
+  const uniqueCompaniesInCart = useMemo(() => {
+    const map = new Map<string, string>();
+    cart.forEach((c) => map.set(c.companyId, c.companyName));
+    return Array.from(map.entries());
+  }, [cart]);
+
+  // Combined Request Submission
+  const handleSubmitCombinedRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerEmail || cartItems.length === 0) return;
+    if (cart.length === 0 || !customerEmail || !customerName) return;
 
     setIsSubmitting(true);
-    const uniqueCompanyIds = Array.from(new Set(cartItems.map((item) => item.companyId)));
-    const primarySector = cartItems[0]?.sector || SectorType.ZAKELIJK_CORPORATE;
-
     try {
+      const companyIds = Array.from(new Set(cart.map((i) => i.companyId)));
+      const itemsList = cart.map((i) => `• ${i.name} (€${i.price}) bij ${i.companyName}`).join("\n");
+      const fullNotes = `Gecombineerde aanvraag voor ${cart.length} producten/diensten:\n${itemsList}\n\nOpmerkingen:\n${requestNotes}`;
+
       const res = await fetch("/api/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName,
           customerEmail,
-          sector: primarySector,
-          companyIds: uniqueCompanyIds,
-          notes: notes || "Gecombineerde marktpleinaanvraag",
-          items: cartItems.map((it) => it.name),
+          sector: cart[0]?.sector || SectorType.ZAKELIJK_CORPORATE,
+          companyIds,
+          companyId: companyIds[0],
+          notes: fullNotes,
         }),
       });
 
-      if (res.ok) {
-        setSubmitSuccess(true);
-        setCartItems([]);
-      }
+      if (!res.ok) throw new Error("Aanvraag mislukt");
+
+      setSubmitSuccess(true);
+      setCart([]);
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        setIsCartOpen(false);
+        setCustomerName("");
+        setCustomerEmail("");
+        setRequestNotes("");
+      }, 4000);
     } catch (err) {
       console.error(err);
+      alert("Er is iets misgegaan bij het versturen van uw aanvraag.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Get Top 5 bundles for a company
-  const getCompanyBundles = (company: CompanyWithMarketData) => {
-    const directBundles = company.bundles.map((b) => b.bundle);
-    const sectorBundles = allBundles.filter(
-      (b) =>
-        b.sector === company.primarySector &&
-        !directBundles.some((db) => db.id === b.id)
-    );
-    return [...directBundles, ...sectorBundles].slice(0, 5);
+  // Stall hover events
+  const handleMouseEnterStall = (company: CompanyWithMarketData, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPopupPos({
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+    });
+    setHoveredCompany(company);
   };
 
-  const cartTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
-  const uniqueCompaniesInCart = Array.from(new Set(cartItems.map((i) => i.companyName)));
+  const handleMouseLeaveStall = () => {
+    setHoveredCompany(null);
+  };
+
+  const handleStallClick = (company: CompanyWithMarketData) => {
+    router.push(`/bedrijf/${company.slug || company.id}`);
+  };
 
   return (
-    <div className="min-h-screen bg-[#e4c158] text-[#2d1808] flex flex-col font-sans relative overflow-x-hidden select-none">
-      {/* 1. TOP HEADER & EXACT CENTER RED B2B BUTTON */}
-      <header className="sticky top-0 z-40 bg-[#cfa844] border-b-4 border-[#4a2810] shadow-md px-3 py-2.5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Left: Retro Market Logo */}
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="w-10 h-10 rounded bg-[#8a4b1f] border-2 border-[#3b1d09] flex items-center justify-center text-xl shadow-inner group-hover:scale-105 transition-transform">
-                🎪
-              </span>
-              <div>
-                <span className="font-mono font-black text-xl tracking-wide text-[#3b1d09] font-mono block leading-none">
-                  ANTONIUSCORE
-                </span>
-                <span className="text-[11px] font-bold text-[#63320f] uppercase tracking-wider block">
-                  🌾 Stardew 2D Marktplein
-                </span>
-              </div>
-            </Link>
-          </div>
+    <div className="min-h-screen bg-desert-market text-[#2d1808] flex flex-col font-sans select-none relative overflow-x-hidden">
+      {/* 1. Header: Logo Links Boven, Zakelijk Inloggen Midden, Mandje Rechts */}
+      <header className="bg-[#cca440] border-b-4 border-[#4a2810] px-4 py-2.5 shadow-lg sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          {/* Logo Links Boven -> https://www.antoniuscore.com (target="_blank") */}
+          <a
+            href="https://www.antoniuscore.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pixel-btn-wood px-3.5 py-2 rounded text-xs font-black tracking-wider uppercase flex items-center gap-2 hover:opacity-95 transition shrink-0"
+          >
+            <span className="font-mono text-xs sm:text-sm tracking-widest text-[#fcd34d]">
+              ANTONIUSCORE
+            </span>
+            <span className="text-[10px] text-[#edd378] border-l border-[#c57b42] pl-2 font-semibold hidden sm:inline">
+              PORTAL
+            </span>
+          </a>
 
-          {/* EXACT CENTER: OPVALLENDE RODE B2B INLOGKNOP */}
-          <div className="order-first sm:order-none flex justify-center w-full sm:w-auto">
+          {/* Exact Midden: Opvallende Rode Knop "Zakelijk Inloggen" */}
+          <div className="flex-1 flex justify-center">
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="pixel-btn-red px-6 py-2.5 rounded text-xs font-black tracking-wider uppercase flex items-center gap-2 shadow-lg"
+                className="pixel-btn-red px-4 sm:px-6 py-2 rounded text-xs font-black tracking-wider uppercase shadow-md transition"
               >
-                <span>⭐</span>
-                <span>B2B Portaal ({userName || "Partner"})</span>
+                Dashboard ({userName ? userName.split(" ")[0] : "Zakelijk"})
               </Link>
             ) : (
               <Link
                 href="/api/auth/signin"
-                className="pixel-btn-red px-7 py-3 rounded text-xs sm:text-sm font-black tracking-wider uppercase flex items-center gap-2 transition-all shadow-xl hover:scale-105"
+                className="pixel-btn-red px-5 sm:px-8 py-2.5 rounded text-xs sm:text-sm font-black tracking-widest uppercase shadow-xl hover:scale-105 transition"
               >
-                <span>🔑</span>
-                <span>Zakelijk Inloggen</span>
+                Zakelijk Inloggen
               </Link>
             )}
           </div>
 
-          {/* Right: Retro Wooden Navigation Buttons */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/dashboard/profile"
-              className="pixel-btn-wood px-3.5 py-1.5 rounded text-xs font-bold flex items-center gap-1.5"
-            >
-              <span>📍</span>
-              <span>Profiel Beheer</span>
-            </Link>
+          {/* Rechts: Mandje & Profiel Knop */}
+          <div className="flex items-center gap-2 shrink-0">
+            {isLoggedIn && (
+              <Link
+                href="/dashboard/profile"
+                className="pixel-btn-wood px-3 py-2 rounded text-xs font-bold hidden md:inline-block"
+              >
+                Mijn Profiel
+              </Link>
+            )}
+
             <button
               onClick={() => setIsCartOpen(true)}
-              className="pixel-btn-gold px-3.5 py-1.5 rounded text-xs font-black flex items-center gap-1.5 relative cursor-pointer"
+              className="pixel-btn-gold px-3.5 py-2 rounded text-xs font-bold flex items-center gap-2 relative cursor-pointer"
             >
-              <span>🧺</span>
-              <span>Mandje</span>
-              {cartItems.length > 0 && (
-                <span className="bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border border-white font-black animate-bounce -mr-1">
-                  {cartItems.length}
+              <span>Winkelmand</span>
+              {cart.length > 0 && (
+                <span className="bg-[#dc2626] text-white text-[10px] font-black rounded-full px-1.5 py-0.2 border border-[#450a0a]">
+                  {cart.length}
                 </span>
               )}
             </button>
@@ -483,59 +575,105 @@ export default function StardewMarket({
         </div>
       </header>
 
-      {/* 2. UITGEBREIDE FILTERS BOVENAAN HET MARKTTERREIN */}
-      <section className="bg-[#edd378] border-b-4 border-[#7c481f] py-2.5 px-4 shadow-sm z-30">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-          {/* Sector Filters */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            <span className="font-bold text-[#5c3011] uppercase tracking-wider shrink-0 mr-1">
-              📜 Sector:
+      {/* 2. Marktplein Status Bar & Controls */}
+      <div className="bg-[#edd378]/90 border-b-2 border-[#7c481f] px-4 py-2 text-xs">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          {/* Live Visitor Indicator */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 font-semibold text-[#4a2810]">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
+              <span>
+                Actieve bezoekers op markt:{" "}
+                <strong className="font-mono text-emerald-900">{activeSessionCount}</strong>
+              </span>
+            </div>
+            <span className="text-[#8a4b1f] hidden sm:inline">•</span>
+            <span className="text-[#63320f] font-medium hidden sm:inline">
+              {filteredCompanies.length} actieve kraampjes geopend
             </span>
+          </div>
+
+          {/* Randomize Knop & Infinite Scroll Toggle */}
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setSelectedSector("ALL")}
-              className={`px-2.5 py-1 rounded text-xs font-black transition border-2 ${
-                selectedSector === "ALL"
-                  ? "bg-[#4a2810] text-[#fff8e7] border-[#221004] shadow-inner"
-                  : "bg-[#fff4d4] text-[#4a2810] border-[#8a4b1f] hover:bg-[#ffeec2]"
+              onClick={() => setShuffleSalt((prev) => prev + 1)}
+              className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold hover:brightness-105 transition cursor-pointer"
+            >
+              Herverdeel Markt
+            </button>
+
+            <button
+              onClick={() => {
+                setIsInfiniteScroll(!isInfiniteScroll);
+                setInfiniteBatchCount(1);
+              }}
+              className={`px-3 py-1.5 rounded text-xs font-bold border transition cursor-pointer ${
+                isInfiniteScroll
+                  ? "bg-emerald-700 text-white border-emerald-950 shadow"
+                  : "pixel-btn-wood text-[#fffbf2]"
               }`}
             >
-              🎪 Alle ({companies.length})
+              {isInfiniteScroll ? "Eindeloos Wandelen: Aan" : "Eindeloos Wandelen: Uit"}
             </button>
-            {(Object.keys(SECTOR_THEMES) as SectorType[]).map((sec) => {
-              const th = SECTOR_THEMES[sec];
-              const isSelected = selectedSector === sec;
-              const count = companies.filter((c) => c.primarySector === sec).length;
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Filter Bar: Sectoren, Stad, Straal, Nu Geopend */}
+      <div className="bg-[#edd378]/70 border-b-2 border-[#7c481f]/40 px-4 py-3">
+        <div className="max-w-7xl mx-auto space-y-3">
+          {/* 10 Sectoren Knoppen (Geen emojis, strakke badges met sector-kleur indicator) */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              onClick={() => setSelectedSector("ALL")}
+              className={`px-3 py-1.5 rounded text-xs font-bold transition border cursor-pointer ${
+                selectedSector === "ALL"
+                  ? "pixel-btn-gold"
+                  : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
+              }`}
+            >
+              Alle Sectoren ({companies.length})
+            </button>
+
+            {(Object.keys(SECTOR_THEMES) as SectorType[]).map((st) => {
+              const meta = SECTOR_THEMES[st];
+              const isSelected = selectedSector === st;
+              const count = companies.filter((c) => c.primarySector === st && c.isMarketplaceVisible !== false).length;
 
               return (
                 <button
-                  key={sec}
-                  onClick={() => setSelectedSector(sec)}
-                  className={`px-2.5 py-1 rounded text-xs font-bold transition border-2 flex items-center gap-1 shrink-0 ${
+                  key={st}
+                  onClick={() => setSelectedSector(st)}
+                  className={`px-3 py-1.5 rounded text-xs font-bold transition border flex items-center gap-2 cursor-pointer ${
                     isSelected
-                      ? "bg-[#4a2810] text-[#fff8e7] border-[#221004] shadow-inner font-black"
-                      : "bg-[#fff4d4] text-[#4a2810] border-[#8a4b1f] hover:bg-[#ffeec2]"
+                      ? "pixel-btn-wood"
+                      : "bg-[#fff4d4] text-[#4a2810] border-[#ba793a] hover:bg-[#fff9ec]"
                   }`}
                 >
-                  <span>{th.icon}</span>
-                  <span>{th.label}</span>
-                  <span className="text-[10px] opacity-75 font-mono">({count})</span>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/20"
+                    style={{ backgroundColor: meta.roofColor1 }}
+                  />
+                  <span>
+                    {meta.label} ({count})
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Locatie, Straal & Nu Geopend Filters */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Secundaire Filters: Stad, Leveringsstraal, Nu Geopend */}
+          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[#4a2810] pt-1">
             {/* Stad filter */}
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-[#5c3011]">📍 Stad:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold">Locatie:</span>
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="bg-[#fff4d4] border-2 border-[#8a4b1f] rounded px-2 py-0.5 text-xs font-bold text-[#4a2810] focus:outline-none"
+                className="bg-[#fff4d4] border border-[#7c481f] rounded px-2.5 py-1 text-xs font-semibold focus:outline-none"
               >
-                <option value="ALL">Alle Steden</option>
-                {availableCities.map((city) => (
+                <option value="ALL">Heel Nederland</option>
+                {uniqueCities.map((city) => (
                   <option key={city} value={city}>
                     {city}
                   </option>
@@ -543,277 +681,255 @@ export default function StardewMarket({
               </select>
             </div>
 
-            {/* Straal Bereik */}
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-[#5c3011]">🚚 Straal:</span>
+            {/* Straal filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold">Max Straal:</span>
               <select
                 value={maxRadiusKm}
                 onChange={(e) => setMaxRadiusKm(Number(e.target.value))}
-                className="bg-[#fff4d4] border-2 border-[#8a4b1f] rounded px-2 py-0.5 text-xs font-bold text-[#4a2810] focus:outline-none"
+                className="bg-[#fff4d4] border border-[#7c481f] rounded px-2.5 py-1 text-xs font-semibold focus:outline-none"
               >
-                <option value={25}>≤ 25 km</option>
-                <option value={50}>≤ 50 km</option>
-                <option value={100}>≤ 100 km (Regio)</option>
-                <option value={500}>Alle Afstanden</option>
+                <option value={25}>Binnen 25 km</option>
+                <option value={50}>Binnen 50 km</option>
+                <option value={100}>Binnen 100 km</option>
+                <option value={200}>Alle afstanden</option>
               </select>
             </div>
 
-            {/* Nu Geopend Toggle */}
-            <button
-              onClick={() => setOnlyOpenNow(!onlyOpenNow)}
-              className={`px-3 py-1 rounded text-xs font-black border-2 flex items-center gap-1.5 transition ${
-                onlyOpenNow
-                  ? "bg-emerald-700 text-white border-emerald-950 shadow-inner"
-                  : "bg-[#fff4d4] text-[#4a2810] border-[#8a4b1f] hover:bg-[#ffeec2]"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  onlyOpenNow ? "bg-emerald-300 animate-pulse" : "bg-emerald-600"
-                }`}
+            {/* Nu Geopend filter */}
+            <label className="flex items-center gap-2 cursor-pointer font-bold select-none">
+              <input
+                type="checkbox"
+                checked={onlyOpenNow}
+                onChange={(e) => setOnlyOpenNow(e.target.checked)}
+                className="accent-[#dc2626] w-3.5 h-3.5"
               />
-              <span>Nu Geopend</span>
+              <span>Alleen nu geopend</span>
+            </label>
+
+            {(selectedSector !== "ALL" || selectedCity !== "ALL" || onlyOpenNow) && (
+              <button
+                onClick={() => {
+                  setSelectedSector("ALL");
+                  setSelectedCity("ALL");
+                  setOnlyOpenNow(false);
+                  setMaxRadiusKm(100);
+                }}
+                className="text-xs text-[#8a4b1f] hover:text-[#3b1d09] font-bold underline cursor-pointer ml-auto"
+              >
+                Filters wissen
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Het Centrale 2D Marktplein Veld */}
+      <main className="flex-1 relative p-6 sm:p-10 max-w-7xl mx-auto w-full">
+        {/* Subtiel Marktplein Courtyard / Cobblestone Area */}
+        <div className="absolute inset-4 sm:inset-8 market-cobblestone rounded-2xl pointer-events-none opacity-40 border border-[#7c481f]/20" />
+
+        {/* Dynamische Live Bezoekers Poppetjes (Zonder tekstballon emojis) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+          {visitors.map((v) => (
+            <div
+              key={v.id}
+              className="absolute transition-all duration-300 ease-linear animate-walk-bob"
+              style={{
+                left: `${v.x}%`,
+                top: `${v.y}%`,
+                transform: `translate(-50%, -50%) ${v.facing === "left" ? "scaleX(-1)" : "scaleX(1)"}`,
+              }}
+            >
+              {/* Pixel Art Miniatuur Bezoeker */}
+              <div className="relative w-6 h-8 flex flex-col items-center">
+                {/* Hoedje */}
+                <div
+                  className="w-4 h-2 rounded-t-sm shadow-xs border border-black/30"
+                  style={{ backgroundColor: v.hatColor }}
+                />
+                {/* Hoofdje */}
+                <div className="w-3.5 h-2.5 bg-[#f5d0a9] border-x border-black/20" />
+                {/* Kleding / Lichaam */}
+                <div
+                  className="w-4 h-3.5 rounded-b-xs border border-black/30 shadow-xs"
+                  style={{ backgroundColor: v.color }}
+                />
+                {/* Voetjes */}
+                <div className="w-3.5 h-1 flex justify-between">
+                  <div className="w-1.5 h-1 bg-[#2d1808] rounded-xs" />
+                  <div className="w-1.5 h-1 bg-[#2d1808] rounded-xs" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Kraampjes Raster: Natuurlijk & Organisch Verspreid met Voldoende Tussenruimte */}
+        {displayedStalls.length === 0 ? (
+          <div className="relative z-10 text-center py-24 space-y-3">
+            <h3 className="font-mono font-black text-xl text-[#4a2810]">
+              Geen kraampjes gevonden
+            </h3>
+            <p className="text-xs text-[#7c481f] max-w-md mx-auto">
+              Er zijn geen geopende kraampjes die voldoen aan de geselecteerde filters. Pas je filters aan of herverdeel het plein.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedSector("ALL");
+                setSelectedCity("ALL");
+                setOnlyOpenNow(false);
+              }}
+              className="pixel-btn-wood px-4 py-2 rounded text-xs font-bold"
+            >
+              Toon alle kraampjes
             </button>
           </div>
-        </div>
-      </section>
+        ) : (
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-12 sm:gap-x-12 sm:gap-y-16 justify-items-center py-6">
+            {displayedStalls.map((company, index) => {
+              const theme = SECTOR_THEMES[company.primarySector] || SECTOR_THEMES.ZAKELIJK_CORPORATE;
+              const isOpen = checkIsOpenNow(company);
+              const key = (company as any).instanceKey || `${company.id}-${index}`;
+              const offsetX = (company as any).organicOffsetX || 0;
+              const offsetY = (company as any).organicOffsetY || 0;
 
-      {/* 3. THE 2D TOP-DOWN MARKTTERREIN */}
-      <main className="relative grow bg-desert-market py-8 px-4 sm:px-8 min-h-[750px] flex flex-col justify-start">
-        {/* Cobblestone paths */}
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-[28%] left-0 right-0 h-20 market-cobblestone border-y-2 border-[#b89132]" />
-          <div className="absolute top-[65%] left-0 right-0 h-20 market-cobblestone border-y-2 border-[#b89132]" />
-          <div className="absolute top-0 bottom-0 left-[50%] w-24 -ml-12 market-cobblestone border-x-2 border-[#b89132]" />
-        </div>
-
-        {/* Decorative Pixel Elements */}
-        <div className="absolute top-4 left-6 text-2xl select-none opacity-90 drop-shadow">📦🛢️</div>
-        <div className="absolute top-4 right-6 text-2xl select-none opacity-90 drop-shadow">🏮🌾</div>
-        <div className="absolute bottom-8 left-8 text-2xl select-none opacity-90 drop-shadow">🌻🪵🛢️</div>
-        <div className="absolute bottom-8 right-8 text-2xl select-none opacity-90 drop-shadow">📦🏮🌾</div>
-        <div className="absolute top-1/2 left-4 text-xl select-none opacity-90 drop-shadow">🌵🌺</div>
-        <div className="absolute top-1/2 right-4 text-xl select-none opacity-90 drop-shadow">🌺🌵</div>
-
-        {/* 4. LIVE WALKING VISITORS */}
-        {visitors.map((vis) => (
-          <div
-            key={vis.id}
-            className="absolute z-20 pointer-events-none transition-all duration-300 ease-linear animate-walk-bob"
-            style={{
-              left: `${vis.x}%`,
-              top: `${vis.y}%`,
-              transform: `scaleX(${vis.facing === "left" ? -1 : 1})`,
-            }}
-          >
-            {vis.bubble && (
-              <div className="absolute -top-7 -left-2 bg-white/95 border-2 border-[#4a2810] px-1.5 py-0.5 rounded-full text-xs shadow-md animate-bubble-float z-30">
-                {vis.bubble}
-              </div>
-            )}
-            <div className="relative flex flex-col items-center">
-              <div
-                className="w-3.5 h-2.5 rounded-t-full border border-black/40 shadow-sm"
-                style={{ backgroundColor: vis.hatColor }}
-              />
-              <div className="w-3 h-2 bg-[#fcd3a1] border-x border-black/30 flex items-center justify-around px-0.5">
-                <div className="w-0.5 h-0.5 bg-black rounded-full" />
-                <div className="w-0.5 h-0.5 bg-black rounded-full" />
-              </div>
-              <div
-                className="w-3.5 h-3 rounded-b border border-black/40 shadow-sm"
-                style={{ backgroundColor: vis.color }}
-              />
-              <div className="w-4 h-1 bg-black/25 rounded-full -mt-0.5 filter blur-[0.5px]" />
-            </div>
-          </div>
-        ))}
-
-        {/* Notice Board Banner */}
-        <div className="relative z-10 max-w-xl mx-auto text-center mb-8">
-          <div className="pixel-box-parchment p-3.5 inline-block shadow-lg">
-            <span className="text-xl mr-1.5">🎪</span>
-            <span className="font-mono font-black text-sm sm:text-base text-[#3b1d09]">
-              DE COMPACTE DORPSMARKT
-            </span>
-            <div className="text-[11px] font-semibold text-[#663814] mt-0.5">
-              Beweeg over een kraam voor de <strong>Top 5 & Bundels</strong>. Klik op de kraam om
-              het <strong>volledige profiel</strong> te openen!
-              <span className="text-[#a16207] block text-[10px] mt-0.5">
-                (Elk uur automatisch eerlijk geshuffeld ⏱️)
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 5. COMPACTE PIXEL-ART KRAAMPJES / HUISJES OP HET VELD */}
-        <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-5 pb-20 justify-items-center">
-          {filteredCompanies.map((company) => {
-            const th = SECTOR_THEMES[company.primarySector];
-            const isOpen = isCompanyOpen(company);
-
-            return (
-              <div
-                key={company.id}
-                onMouseEnter={(e) => {
-                  if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setHoverPosition({
-                    x: Math.min(window.innerWidth - 320, Math.max(10, rect.left - 80)),
-                    y: rect.bottom + 8 > window.innerHeight - 300 ? rect.top - 280 : rect.bottom + 6,
-                  });
-                  setHoveredCompany(company);
-                }}
-                onMouseLeave={() => {
-                  hoverTimeoutRef.current = setTimeout(() => {
-                    setHoveredCompany(null);
-                  }, 250);
-                }}
-                onClick={() => {
-                  router.push(`/bedrijf/${company.slug || company.id}`);
-                }}
-                className="group relative cursor-pointer flex flex-col items-center transition-transform duration-150 hover:-translate-y-2 hover:scale-105"
-              >
-                {/* COMPACT PIXEL-ART STALL (Breedte: ~110px) */}
-                <div className="w-[110px] flex flex-col items-center select-none">
-                  {/* Status Indicator (Open/Dicht bolletje) */}
-                  <div className="flex items-center gap-1 mb-1">
-                    <span
-                      className={`w-2 h-2 rounded-full border border-black/40 ${
-                        isOpen ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                      }`}
-                      title={isOpen ? "Nu Geopend" : "Nu Gesloten"}
-                    />
-                    <span className="text-[9px] font-black text-[#5c3011] truncate max-w-[85px]">
-                      {company.city || "NL"}
-                    </span>
+              return (
+                <div
+                  key={key}
+                  onClick={() => handleStallClick(company)}
+                  onMouseEnter={(e) => handleMouseEnterStall(company, e)}
+                  onMouseLeave={handleMouseLeaveStall}
+                  style={{
+                    transform: `translate(${offsetX}px, ${offsetY}px)`,
+                  }}
+                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-40"
+                >
+                  {/* Boven het kraampje: Volledige Bedrijfsnaam (Strak, duidelijk leesbaar) */}
+                  <div className="text-center font-bold text-[11px] sm:text-xs text-[#2d1808] leading-tight max-w-[130px] sm:max-w-[145px] truncate mb-1 px-1 bg-[#fff8e7]/80 rounded border border-[#7c481f]/30 shadow-xs">
+                    {company.name}
                   </div>
 
-                  {/* Puntig / Gestreepte Luifel (Unieke kleuren per sector) */}
-                  <div
-                    className={`w-full h-11 rounded-t border-3 ${th.borderCol} relative overflow-hidden shadow-md`}
-                    style={{
-                      background: th.isWood
-                        ? `repeating-linear-gradient(0deg, ${th.roofColor1}, ${th.roofColor1} 5px, ${th.roofColor2} 5px, ${th.roofColor2} 10px)`
-                        : `repeating-linear-gradient(90deg, ${th.roofColor1}, ${th.roofColor1} 11px, ${th.roofColor2} 11px, ${th.roofColor2} 22px)`,
-                    }}
-                  >
-                    {/* Houten palen aan weerskanten */}
-                    <div className="absolute top-0 bottom-0 left-1 w-1 bg-[#3b1d09]" />
-                    <div className="absolute top-0 bottom-0 right-1 w-1 bg-[#3b1d09]" />
-
-                    {/* Sector Icon in het midden van het dakje */}
-                    <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-[#3b1d09]/90 border border-amber-300 px-1 py-0.2 rounded text-[10px] leading-tight text-white flex items-center justify-center shadow">
-                      {th.icon}
+                  {/* 2D Pixel Art Kraampje (Compact & Stijlvol) */}
+                  <div className="relative w-28 sm:w-32 flex flex-col items-center">
+                    {/* Luifel / Dakje: Sector Gekleurde Strepen / Hout */}
+                    <div
+                      className={`w-full h-8 sm:h-9 rounded-t-md border-3 ${theme.borderCol} shadow-md overflow-hidden relative`}
+                      style={{
+                        backgroundImage: theme.isWood
+                          ? `repeating-linear-gradient(90deg, ${theme.roofColor1}, ${theme.roofColor1} 10px, ${theme.roofColor2} 10px, ${theme.roofColor2} 20px)`
+                          : `repeating-linear-gradient(90deg, ${theme.roofColor1}, ${theme.roofColor1} 11px, ${theme.roofColor2} 11px, ${theme.roofColor2} 22px)`,
+                      }}
+                    >
+                      {/* Subtiel golfje / geschulpt randje onderaan de luifel */}
+                      <div className="absolute bottom-0 inset-x-0 h-1.5 bg-black/15 flex justify-between">
+                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                      </div>
                     </div>
 
-                    {/* Golvende rand van de stof */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1.5 flex justify-between overflow-hidden">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-3 h-2 -mb-1 rounded-full bg-[#3b1d09] shrink-0"
-                        />
-                      ))}
+                    {/* Kramer / Winkelier Sprite Achter Toonbank */}
+                    <div className="w-full h-5 bg-[#522709] border-x-3 border-[#3b1d09] flex items-center justify-center relative">
+                      <div className="w-4 h-4 rounded-full bg-[#fcd34d] border border-[#78350f] shadow-xs" />
                     </div>
-                  </div>
 
-                  {/* Toonbank en Marktkramer */}
-                  <div className="w-full bg-[#edd378] border-x-3 border-b-3 border-[#3b1d09] p-1.5 flex flex-col items-center shadow-sm">
-                    {/* Houten toonbank met mini-kramer */}
-                    <div className="w-full bg-[#ba793a] border border-[#5c3011] rounded py-1 px-1 flex items-center justify-center gap-1.5 shadow-inner">
-                      {/* Mini Pixel Avatar */}
-                      <div className="flex flex-col items-center shrink-0">
-                        <div
-                          className="w-2.5 h-1.5 rounded-t-full"
-                          style={{ backgroundColor: th.roofColor1 }}
-                        />
-                        <div className="w-2 h-1.5 bg-[#fcd3a1]" />
-                        <div className="w-2.5 h-1.5 bg-[#3b82f6] rounded-b" />
+                    {/* Toonbank / Basis van het Kraampje */}
+                    <div className="w-full h-9 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md p-1 flex flex-col items-center justify-between">
+                      {/* In/op het kraampje: Strak de Plaatsnaam */}
+                      <div className="w-full text-center text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate">
+                        {company.city || "Nederland"}
                       </div>
 
-                      {/* Producten teaser indicator */}
-                      <span className="text-[9px] font-black font-mono text-[#3b1d09]">
-                        📦 {company.products.length}
-                      </span>
+                      {/* Status & Catalogus indicator */}
+                      <div className="w-full flex items-center justify-between px-1 text-[9px] font-bold">
+                        <span className="text-[#3b1d09]">
+                          {company.products.length} items
+                        </span>
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            isOpen ? "bg-emerald-600 shadow-[0_0_5px_#16a34a]" : "bg-rose-600"
+                          }`}
+                        />
+                      </div>
                     </div>
 
-                    {/* Houten Uithangbordje met Bedrijfsnaam */}
-                    <div className="w-full bg-[#8a4b1f] border border-[#3b1d09] text-[#fff8e7] px-1 py-0.5 rounded text-center shadow-inner mt-1">
-                      <span className="font-mono font-black text-[9px] block truncate leading-tight">
-                        {company.name}
-                      </span>
-                    </div>
+                    {/* Grondschaduw */}
+                    <div className="w-24 h-2 bg-black/20 rounded-full mt-1 blur-2xs" />
                   </div>
-
-                  {/* Grondschaduw */}
-                  <div className="w-[85%] h-2 bg-black/25 rounded-full filter blur-[1px] -mt-0.5" />
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
-        {/* 6. COMPACT HOVER MENUUTJE (UITSLUITEND TOP 5 PRODUCTEN & 5 BUNDELS) */}
-        {hoveredCompany && (
-          <div
-            onMouseEnter={() => {
-              if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-            }}
-            onMouseLeave={() => setHoveredCompany(null)}
-            className="fixed z-50 w-80 pixel-box-parchment p-3.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
-            style={{
-              left: `${hoverPosition.x}px`,
-              top: `${hoverPosition.y}px`,
-            }}
-          >
-            {/* Header van de pop-up */}
-            <div className="flex items-center justify-between pb-2 border-b-2 border-[#7c481f] mb-2.5">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base p-1 bg-[#edd378] border border-[#7c481f] rounded">
-                  {SECTOR_THEMES[hoveredCompany.primarySector]?.icon}
+        {/* Infinite Scroll trigger element */}
+        {isInfiniteScroll && (
+          <div ref={loadMoreRef} className="py-8 text-center text-xs text-[#7c481f] font-bold">
+            Plein wordt oneindig uitgebreid met kraampjes...
+          </div>
+        )}
+      </main>
+
+      {/* 5. Hover Popup: Enkel Top 5 Producten & 5 Afgesproken Bundels (Geen emojis) */}
+      {hoveredCompany && popupPos && (
+        <div
+          className="fixed z-50 pointer-events-auto transform -translate-x-1/2 -translate-y-full mb-3 animate-in fade-in zoom-in-95 duration-150"
+          style={{
+            left: `${popupPos.x}px`,
+            top: `${popupPos.y - 10}px`,
+          }}
+          onMouseEnter={() => setHoveredCompany(hoveredCompany)}
+          onMouseLeave={handleMouseLeaveStall}
+        >
+          <div className="w-72 sm:w-80 pixel-box-parchment p-3.5 shadow-2xl rounded-lg text-xs space-y-2.5">
+            {/* Header van Pop-up */}
+            <div className="border-b border-[#7c481f] pb-2 flex items-start justify-between gap-2">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a4b1f] block">
+                  {SECTOR_THEMES[hoveredCompany.primarySector]?.label || hoveredCompany.primarySector} • {hoveredCompany.city || "Nederland"}
                 </span>
-                <div>
-                  <h4 className="font-mono font-black text-xs text-[#3b1d09] truncate max-w-[190px]">
-                    {hoveredCompany.name}
-                  </h4>
-                  <span className="text-[9px] text-[#7c481f] font-bold block">
-                    📍 {hoveredCompany.city || "Nederland"} • {hoveredCompany.primarySector}
-                  </span>
-                </div>
+                <h4 className="font-mono font-black text-sm text-[#3b1d09] leading-tight">
+                  {hoveredCompany.name}
+                </h4>
               </div>
-
-              <Link
-                href={`/bedrijf/${hoveredCompany.slug || hoveredCompany.id}`}
-                className="text-[9px] font-bold text-rose-700 hover:text-rose-900 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-300"
-              >
-                Profiel →
-              </Link>
+              <span className="text-[10px] font-mono font-bold text-amber-900 bg-[#edd378] px-1.5 py-0.5 rounded border border-[#ba793a] shrink-0">
+                {checkIsOpenNow(hoveredCompany) ? "Geopend" : "Gesloten"}
+              </span>
             </div>
 
-            {/* A. Top 5 Losse Producten */}
-            <div className="mb-2.5">
-              <div className="flex items-center justify-between text-[10px] font-black text-[#4a2810] uppercase mb-1">
-                <span>🏆 Top 5 Producten:</span>
-                <span className="text-[9px] text-[#8a4b1f] font-normal">Klik (+) voor mandje</span>
+            {/* Top 5 Producten */}
+            <div>
+              <div className="text-[10px] font-black uppercase text-[#4a2810] tracking-wider mb-1">
+                Top 5 Producten:
               </div>
               <div className="space-y-1">
                 {hoveredCompany.products.slice(0, 5).map((prod) => (
                   <div
                     key={prod.id}
-                    className="p-1 rounded bg-[#fff4d4] border border-[#ba793a] flex items-center justify-between text-[10px]"
+                    className="flex items-center justify-between gap-2 bg-[#fff4d4] px-2 py-1 rounded border border-[#ba793a]/40"
                   >
-                    <span className="font-bold text-[#3b1d09] truncate max-w-[170px]">
+                    <span className="truncate text-[11px] font-medium text-[#2d1808]">
                       {prod.name}
                     </span>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="font-mono font-extrabold text-[#3b1d09]">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="font-mono font-bold text-[11px] text-[#3b1d09]">
                         €{prod.price}
                       </span>
                       <button
-                        onClick={(e) => addToCart(prod, hoveredCompany, e)}
-                        className="pixel-btn-wood px-1.5 py-0.2 rounded text-[9px] font-black cursor-pointer"
-                        title="In aanvraagmandje"
+                        onClick={(e) =>
+                          addToCart(e, {
+                            id: prod.id,
+                            name: prod.name,
+                            price: prod.price,
+                            companyId: hoveredCompany.id,
+                            companyName: hoveredCompany.name,
+                            type: "product",
+                            sector: hoveredCompany.primarySector,
+                          })
+                        }
+                        title="Toevoegen aan winkelmand"
+                        className="w-4 h-4 rounded bg-[#8a4b1f] text-white hover:bg-[#a15523] flex items-center justify-center font-bold text-[10px] cursor-pointer"
                       >
                         +
                       </button>
@@ -823,39 +939,39 @@ export default function StardewMarket({
               </div>
             </div>
 
-            {/* B. 5 Afgesproken Samenwerkingsbundels */}
-            <div>
-              <div className="flex items-center justify-between text-[10px] font-black text-[#6d28d9] uppercase mb-1">
-                <span>🤝 5 Partner Bundels:</span>
-              </div>
-
-              {getCompanyBundles(hoveredCompany).length === 0 ? (
-                <div className="text-[9px] text-[#7c481f] italic bg-[#fff4d4] p-1 rounded text-center">
-                  Geen actieve bundels.
+            {/* 5 Afgesproken Bundels */}
+            {hoveredCompany.bundles.length > 0 && (
+              <div>
+                <div className="text-[10px] font-black uppercase text-[#5b21b6] tracking-wider mb-1">
+                  Samenwerkingsbundels:
                 </div>
-              ) : (
                 <div className="space-y-1">
-                  {getCompanyBundles(hoveredCompany).map((bundle) => (
+                  {hoveredCompany.bundles.slice(0, 5).map(({ bundle }) => (
                     <div
                       key={bundle.id}
-                      className="p-1 rounded bg-[#f5f3ff] border border-[#8b5cf6] flex items-center justify-between text-[10px]"
+                      className="flex items-center justify-between gap-2 bg-[#ede9fe] px-2 py-1 rounded border border-[#c4b5fd]"
                     >
-                      <div className="truncate max-w-[160px]">
-                        <span className="font-extrabold text-[#4c1d95] block truncate">
-                          {bundle.title}
-                        </span>
-                        <span className="text-[8px] text-[#6d28d9]">
-                          {bundle.companies.length} partners
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="font-mono font-black text-[#5b21b6]">
+                      <span className="truncate text-[11px] font-bold text-[#4c1d95]">
+                        {bundle.title}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="font-mono font-black text-[11px] text-[#5b21b6]">
                           €{bundle.price}
                         </span>
                         <button
-                          onClick={(e) => addBundleToCart(bundle, hoveredCompany, e)}
-                          className="px-1.5 py-0.2 rounded bg-[#7c3aed] text-white text-[9px] font-black border border-[#4c1d95] cursor-pointer"
-                          title="In aanvraagmandje"
+                          onClick={(e) =>
+                            addToCart(e, {
+                              id: bundle.id,
+                              name: bundle.title,
+                              price: bundle.price,
+                              companyId: hoveredCompany.id,
+                              companyName: hoveredCompany.name,
+                              type: "bundle",
+                              sector: bundle.sector,
+                            })
+                          }
+                          title="Voeg bundel toe"
+                          className="w-4 h-4 rounded bg-[#7c3aed] text-white hover:bg-[#6d28d9] flex items-center justify-center font-bold text-[10px] cursor-pointer"
                         >
                           +
                         </button>
@@ -863,225 +979,170 @@ export default function StardewMarket({
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Footer van de pop-up: duidelijke doorklikinstructie */}
-            <div className="pt-2 border-t border-[#7c481f]/40 mt-2 text-center">
-              <Link
-                href={`/bedrijf/${hoveredCompany.slug || hoveredCompany.id}`}
-                className="text-[10px] font-black text-[#3b1d09] hover:text-[#8a4b1f] block underline cursor-pointer"
-              >
-                👉 Klik op kraampje voor catalogus & recensies
-              </Link>
+            {/* Footer van Pop-up met doorklik hint */}
+            <div className="pt-1.5 border-t border-[#7c481f]/30 flex items-center justify-between text-[10px] text-[#7c481f] font-semibold">
+              <span>Klik voor bedrijfspagina</span>
+              <span className="text-[#8a4b1f] font-bold">Bekijk Profiel →</span>
             </div>
           </div>
-        )}
-
-        {/* 7. FLOATING BOODSCHAPPENMAND KNOP */}
-        <div className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => setIsCartOpen(!isCartOpen)}
-            className="pixel-btn-gold px-4 py-3 rounded-xl text-sm font-black flex items-center gap-2 shadow-2xl cursor-pointer hover:scale-105 transition-transform"
-          >
-            <span className="text-xl">🧺</span>
-            <span>Aanvraag Mandje</span>
-            <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-mono border border-white">
-              {cartItems.length}
-            </span>
-          </button>
         </div>
+      )}
 
-        {/* 8. WINKELMAND SLIDE-OVER DRAWER (BULK GECOMBINEERDE AANVRAAG) */}
-        {isCartOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center sm:justify-end p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div
-              className="w-full sm:max-w-md bg-[#fff9ec] border-4 border-[#4a2810] rounded-xl p-6 shadow-2xl max-h-[92vh] flex flex-col relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded bg-[#8a4b1f] hover:bg-[#a15523] text-white border-2 border-[#3b1d09] flex items-center justify-center font-black text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-
-              <div className="flex items-center gap-2.5 pb-4 border-b-2 border-[#7c481f] mb-4">
-                <span className="text-2xl p-2 bg-[#edd378] border-2 border-[#7c481f] rounded">
-                  🧺
-                </span>
+      {/* 6. Zwevend Boodschappenmandje Drawer (Gecombineerde Aanvraag) */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div
+            className="w-full max-w-md bg-[#fff9ec] border-l-4 border-[#4a2810] h-full p-6 shadow-2xl flex flex-col justify-between overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b-2 border-[#7c481f] mb-4">
                 <div>
                   <h3 className="font-mono font-black text-lg text-[#3b1d09]">
-                    BULK AANVRAAG MANDJE
+                    GEOFROTEERDE AANVRAAG
                   </h3>
-                  <p className="text-xs text-[#7c481f] font-semibold">
-                    Verzamel van meerdere kramen voor één gecombineerde offerte
+                  <p className="text-xs text-[#7c481f]">
+                    Verzamel diensten van meerdere marktpartijen in één aanvraag.
                   </p>
                 </div>
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="w-7 h-7 rounded bg-[#8a4b1f] hover:bg-[#a15523] text-white font-bold flex items-center justify-center text-xs cursor-pointer border border-[#4a2810]"
+                >
+                  ✕
+                </button>
               </div>
 
-              {submitSuccess ? (
-                <div className="text-center py-10 space-y-4 grow flex flex-col items-center justify-center">
-                  <span className="text-4xl animate-bounce">🎉</span>
-                  <h4 className="font-mono font-black text-lg text-[#15803d]">
-                    AANVRAAG VERZONDEN!
-                  </h4>
-                  <p className="text-xs text-[#166534] max-w-xs leading-relaxed font-medium">
-                    Jouw gecombineerde aanvraag is direct doorgestuurd naar de betreffende
-                    partners. Zij nemen spoedig contact met je op met een gezamenlijk voorstel!
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSubmitSuccess(false);
-                      setIsCartOpen(false);
-                    }}
-                    className="pixel-btn-wood px-5 py-2 rounded text-xs font-bold"
-                  >
-                    Terug naar Marktplein
-                  </button>
-                </div>
-              ) : cartItems.length === 0 ? (
-                <div className="text-center py-12 text-[#7c481f] space-y-2 grow flex flex-col items-center justify-center">
-                  <span className="text-3xl opacity-60">🧺</span>
-                  <div className="font-bold text-sm">Je marktmandje is nog leeg</div>
-                  <p className="text-xs text-[#a16207] max-w-xs">
-                    Beweeg over de marktkraampjes en klik op <strong>"+"</strong> om producten of
-                    bundels van meerdere bedrijven te verzamelen.
-                  </p>
+              {/* Items List */}
+              {cart.length === 0 ? (
+                <div className="text-center py-12 text-[#7c481f] text-xs">
+                  <p className="font-bold mb-1">Uw mandje is nog leeg.</p>
+                  <p>Beweeg over een kraampje en voeg diensten of bundels toe.</p>
                 </div>
               ) : (
-                <>
-                  <div className="overflow-y-auto space-y-2 mb-4 grow pr-1 text-xs">
-                    <div className="text-[10px] text-[#7c481f] uppercase font-bold tracking-wider">
-                      Geselecteerde Items ({cartItems.length}):
-                    </div>
-
-                    {cartItems.map((item, idx) => (
+                <div className="space-y-4">
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {cart.map((item, index) => (
                       <div
-                        key={`${item.id}-${idx}`}
-                        className="p-2.5 rounded bg-[#fff4d4] border border-[#ba793a] flex items-center justify-between gap-2"
+                        key={`${item.id}-${index}`}
+                        className="p-2.5 rounded bg-[#fff4d4] border border-[#ba793a] flex items-center justify-between gap-2 text-xs"
                       >
-                        <div>
-                          <div className="font-bold text-[#3b1d09]">{item.name}</div>
-                          <div className="text-[10px] text-[#8a4b1f]">
-                            🏢 Kraam: {item.companyName}
-                          </div>
+                        <div className="truncate">
+                          <span className="font-bold text-[#3b1d09] block truncate">
+                            {item.name}
+                          </span>
+                          <span className="text-[10px] text-[#7c481f]">
+                            {item.companyName}
+                          </span>
                         </div>
-
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-mono font-black text-[#3b1d09]">
-                            €{item.price.toLocaleString("nl-NL")}
+                          <span className="font-mono font-bold text-[#3b1d09]">
+                            €{item.price}
                           </span>
                           <button
-                            onClick={() => removeFromCart(idx)}
-                            className="text-red-700 hover:text-red-900 font-bold px-1.5 py-0.5 rounded bg-red-100 hover:bg-red-200 border border-red-300 cursor-pointer"
-                            title="Verwijderen"
+                            onClick={() => removeFromCart(index)}
+                            className="text-red-700 hover:text-red-900 font-bold px-1.5 py-0.5 rounded cursor-pointer"
                           >
                             ✕
                           </button>
                         </div>
                       </div>
                     ))}
-
-                    <div className="p-3 bg-[#edd378] border-2 border-[#7c481f] rounded-lg mt-3">
-                      <div className="flex items-center justify-between font-mono font-black text-sm text-[#3b1d09]">
-                        <span>Indicatief Totaal:</span>
-                        <span>€{cartTotal.toLocaleString("nl-NL")}</span>
-                      </div>
-                      <div className="text-[10px] text-[#63320f] mt-1">
-                        Betrokken bedrijven: {uniqueCompaniesInCart.join(", ")}
-                      </div>
-                    </div>
                   </div>
 
-                  <form onSubmit={handleBulkRequestSubmit} className="space-y-3 border-t-2 border-[#7c481f] pt-4">
-                    <div>
-                      <label className="block text-[11px] font-bold text-[#4a2810] mb-1">
-                        Jouw Naam *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="bijv. Jan Jansen"
-                        className="w-full bg-[#fff4d4] border-2 border-[#7c481f] rounded px-3 py-1.5 text-xs text-[#2d1808] focus:outline-none focus:border-[#4a2810]"
-                      />
-                    </div>
+                  {/* Betrokken Partners Overzicht */}
+                  <div className="p-3 bg-[#edd378]/60 rounded border border-[#7c481f] text-xs">
+                    <span className="font-bold text-[#4a2810] block mb-1">
+                      Betrokken bedrijven ({uniqueCompaniesInCart.length}):
+                    </span>
+                    <ul className="space-y-0.5 text-[11px] text-[#5c3011]">
+                      {uniqueCompaniesInCart.map(([id, name]) => (
+                        <li key={id}>• {name}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-                    <div>
-                      <label className="block text-[11px] font-bold text-[#4a2810] mb-1">
-                        E-mailadres *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                        placeholder="jan@voorbeeld.nl"
-                        className="w-full bg-[#fff4d4] border-2 border-[#7c481f] rounded px-3 py-1.5 text-xs text-[#2d1808] focus:outline-none focus:border-[#4a2810]"
-                      />
-                    </div>
+                  {/* Totaalbedrag Indicatie */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#7c481f]/40 font-mono font-black text-sm text-[#3b1d09]">
+                    <span>Indicatief Totaal:</span>
+                    <span>€{cartTotal.toLocaleString("nl-NL")}</span>
+                  </div>
 
-                    <div>
-                      <label className="block text-[11px] font-bold text-[#4a2810] mb-1">
-                        Opmerking / Gewenste datum (optioneel)
-                      </label>
-                      <input
-                        type="text"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="bijv. Bruiloft op 18 september 2026"
-                        className="w-full bg-[#fff4d4] border-2 border-[#7c481f] rounded px-3 py-1.5 text-xs text-[#2d1808] focus:outline-none focus:border-[#4a2810]"
-                      />
+                  {/* Aanvraagformulier */}
+                  {submitSuccess ? (
+                    <div className="p-4 rounded bg-emerald-100 border border-emerald-500 text-emerald-900 text-xs font-bold text-center space-y-1">
+                      <p className="text-sm">Aanvraag succesvol verzonden!</p>
+                      <p className="font-normal text-[11px]">
+                        De geselecteerde bedrijven hebben uw gecombineerde aanvraag ontvangen.
+                      </p>
                     </div>
+                  ) : (
+                    <form onSubmit={handleSubmitCombinedRequest} className="space-y-3 pt-2 text-xs">
+                      <div>
+                        <label className="block font-bold text-[#4a2810] mb-1">
+                          Uw Naam *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          placeholder="bijv. Sandra Mulder"
+                          className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                        />
+                      </div>
 
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full pixel-btn-red py-3 rounded text-xs font-black uppercase tracking-wider transition disabled:opacity-50 cursor-pointer shadow-lg"
-                    >
-                      {isSubmitting
-                        ? "Aanvraag Verzenden..."
-                        : `✉️ Gecombineerde Aanvraag Versturen (${uniqueCompaniesInCart.length} partners)`}
-                    </button>
-                    <p className="text-[10px] text-center text-[#7c481f]">
-                      Geen directe betaling. De geselecteerde bedrijven ontvangen jouw aanvraag als gezamenlijk CustomRequest.
-                    </p>
-                  </form>
-                </>
+                      <div>
+                        <label className="block font-bold text-[#4a2810] mb-1">
+                          E-mailadres *
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          placeholder="sandra@voorbeeld.nl"
+                          className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#4a2810] mb-1">
+                          Toelichting / Gewenste datum
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={requestNotes}
+                          onChange={(e) => setRequestNotes(e.target.value)}
+                          placeholder="Optionele details over planning of wensen..."
+                          className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="pixel-btn-red w-full py-3 rounded text-xs font-black uppercase tracking-wider transition disabled:opacity-50 cursor-pointer shadow-lg"
+                      >
+                        {isSubmitting ? "Aanvraag verzenden..." : "Verstuur Gecombineerde Aanvraag"}
+                      </button>
+                    </form>
+                  )}
+                </div>
               )}
             </div>
-          </div>
-        )}
-      </main>
 
-      {/* 9. FOOTER */}
-      <footer className="bg-[#4a2810] border-t-4 border-[#221004] text-[#fff4d4] py-6 px-4 text-center text-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🌾</span>
-            <span className="font-mono font-bold">
-              AntoniusCore B2B2C Marktplein — Stardew Valley Pixel Art Experience
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-semibold">
-            <Link href="/" className="hover:text-[#edd378] transition">
-              Marktplein
-            </Link>
-            <Link href="/dashboard" className="hover:text-[#edd378] transition">
-              B2B Dashboard
-            </Link>
-            <Link href="/dashboard/profile" className="hover:text-[#edd378] transition">
-              Profiel & Capaciteit
-            </Link>
-            <Link href="/dashboard/settings" className="hover:text-[#edd378] transition">
-              Kraam Instellingen
-            </Link>
+            {/* Mandje Footer */}
+            <div className="pt-4 border-t border-[#7c481f]/30 text-[10px] text-[#7c481f] text-center">
+              AntoniusCore B2B2C Marktplein • Geen directe betaling, enkel vrijblijvende aanvragen.
+            </div>
           </div>
         </div>
-      </footer>
+      )}
     </div>
   );
 }

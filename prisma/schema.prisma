@@ -17,6 +17,11 @@ enum SectorType {
   BOUW_RENOVATIE
   ZAKELIJK_CORPORATE
   CATERING_HORECA
+  MARKETING_MEDIA_FOTOGRAFIE
+  AUTOMOTIVE_LOGISTIEK
+  BEAUTY_LIFESTYLE
+  ONDERWIJS_WORKSHOPS
+  KUNST_ENTERTAINMENT
 }
 
 enum RequestStatus {
@@ -97,6 +102,7 @@ model Company {
   serviceRadiusKm           Int?                   @default(30)
   availableStaff            Int?                   @default(1)
   clientCapacityPerProduct   Int?                   @default(5)
+  isMarketplaceVisible      Boolean                @default(true)
   recommendedCompanies      String[]               @default([])
   blacklistedCompanies      String[]               @default([])
   kvkNumber                 String?

@@ -34,7 +34,7 @@ export default async function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-slate-800">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold mb-2">
-            <span>🏢</span> Zakelijk Partner Portaal
+            Zakelijk Partner Portaal
           </div>
           <h1 className="text-3xl font-extrabold text-white">B2B Dashboard</h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -45,21 +45,21 @@ export default async function Dashboard() {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/"
-            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs font-bold text-slate-200 hover:text-white transition"
           >
-            <span>🎪</span> 2D Marktplein
+            Marktplein
           </Link>
           <Link
             href="/dashboard/profile"
-            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-200 hover:text-white transition"
           >
-            <span>📍</span> Profiel & Capaciteit
+            Profiel & Capaciteit
           </Link>
           <Link
             href="/dashboard/settings"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-900/30 flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-900/30"
           >
-            <span>⚙️</span> Sector & Producten
+            Sector & Producten
           </Link>
         </div>
       </div>
@@ -70,9 +70,15 @@ export default async function Dashboard() {
         <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl">🎪</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                Live op Marktplein
+              <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+                Marktplein Status
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                company?.isMarketplaceVisible !== false
+                  ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
+                  : "bg-rose-950 text-rose-300 border border-rose-800"
+              }`}>
+                {company?.isMarketplaceVisible !== false ? "Zichtbaar op Markt" : "Niet Zichtbaar"}
               </span>
             </div>
             <h2 className="text-lg font-bold text-white mb-1">Mijn Kraampje</h2>
@@ -95,7 +101,9 @@ export default async function Dashboard() {
         <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl">🤝</span>
+              <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+                Samenwerkingen
+              </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800">
                 Cross-Sector
               </span>
@@ -118,9 +126,11 @@ export default async function Dashboard() {
         <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl">🎯</span>
+              <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+                Matching
+              </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800">
-                Samenwerkingsmatch
+                Sector Match
               </span>
             </div>
             <h2 className="text-lg font-bold text-white mb-1">Open Sectoren</h2>

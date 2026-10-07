@@ -15,6 +15,7 @@ export default async function HomePage() {
   const [companiesWithProducts, allBundles] = await Promise.all([
     prisma.company.findMany({
       where: {
+        isMarketplaceVisible: true,
         products: {
           some: {},
         },

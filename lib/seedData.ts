@@ -15,6 +15,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 45,
     availableStaff: 4,
     clientCapacityPerProduct: 3,
+    isMarketplaceVisible: true,
     primarySector: SectorType.BRUILOFT,
     openForSectors: [SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.CATERING_HORECA],
     kvkNumber: "84729103",
@@ -41,6 +42,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 60,
     availableStaff: 2,
     clientCapacityPerProduct: 2,
+    isMarketplaceVisible: true,
     primarySector: SectorType.BRUILOFT,
     openForSectors: [SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.ZAKELIJK_CORPORATE],
     kvkNumber: "75839201",
@@ -66,6 +68,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 80,
     availableStaff: 6,
     clientCapacityPerProduct: 5,
+    isMarketplaceVisible: true,
     primarySector: SectorType.EVENEMENTEN_FEEST,
     openForSectors: [SectorType.EVENEMENTEN_FEEST, SectorType.BRUILOFT, SectorType.ZAKELIJK_CORPORATE],
     kvkNumber: "64910283",
@@ -91,6 +94,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 40,
     availableStaff: 4,
     clientCapacityPerProduct: 4,
+    isMarketplaceVisible: true,
     primarySector: SectorType.EVENEMENTEN_FEEST,
     openForSectors: [SectorType.EVENEMENTEN_FEEST, SectorType.BRUILOFT, SectorType.CATERING_HORECA],
     kvkNumber: "59382019",
@@ -116,6 +120,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 50,
     availableStaff: 12,
     clientCapacityPerProduct: 8,
+    isMarketplaceVisible: true,
     primarySector: SectorType.BOUW_RENOVATIE,
     openForSectors: [SectorType.BOUW_RENOVATIE, SectorType.ZAKELIJK_CORPORATE],
     kvkNumber: "48201928",
@@ -141,6 +146,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 45,
     availableStaff: 8,
     clientCapacityPerProduct: 6,
+    isMarketplaceVisible: true,
     primarySector: SectorType.BOUW_RENOVATIE,
     openForSectors: [SectorType.BOUW_RENOVATIE, SectorType.ZAKELIJK_CORPORATE],
     kvkNumber: "39102948",
@@ -166,6 +172,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 100,
     availableStaff: 5,
     clientCapacityPerProduct: 4,
+    isMarketplaceVisible: true,
     primarySector: SectorType.ZAKELIJK_CORPORATE,
     openForSectors: [SectorType.ZAKELIJK_CORPORATE, SectorType.EVENEMENTEN_FEEST, SectorType.CATERING_HORECA],
     kvkNumber: "29103948",
@@ -191,6 +198,7 @@ export const SAMPLE_COMPANIES = [
     serviceRadiusKm: 55,
     availableStaff: 9,
     clientCapacityPerProduct: 10,
+    isMarketplaceVisible: true,
     primarySector: SectorType.CATERING_HORECA,
     openForSectors: [SectorType.CATERING_HORECA, SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.ZAKELIJK_CORPORATE],
     kvkNumber: "19203948",
@@ -201,6 +209,128 @@ export const SAMPLE_COMPANIES = [
       { name: "Walking Dinner 5-Gangen Culinaire Ervaring (p.p.)", price: 58, isTop5: true, description: "Vijf verfijnde gerechtjes uitgeserveerd in stijlvolle mini-schalen." },
       { name: "Mobiele Espresso & Cannoli Bar", price: 490, isTop5: true, description: "Inclusief barista, 200 kopjes Italiaanse koffie en verse Siciliaanse cannoli." },
       { name: "Traditionele Huisgemaakte Tiramisu Taart (25p)", price: 95, isTop5: true, description: "Met savoiardi, mascarpone en amaretto volgens familierecept." }
+    ]
+  },
+  // Nieuwe Sectoren:
+  {
+    slug: "studio-veldhuis-media",
+    name: "Studio Veldhuis Fotografie & Content",
+    description: "Commerciële videoproductie, high-end productfotografie en social media content voor ambitieuze merken.",
+    logoUrl: "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://studioveldhuis.nl",
+    city: "Rotterdam",
+    address: "Wilhelminapier 45, Rotterdam",
+    latitude: 51.9054,
+    longitude: 4.4862,
+    serviceRadiusKm: 75,
+    availableStaff: 5,
+    clientCapacityPerProduct: 4,
+    isMarketplaceVisible: true,
+    primarySector: SectorType.MARKETING_MEDIA_FOTOGRAFIE,
+    openForSectors: [SectorType.MARKETING_MEDIA_FOTOGRAFIE, SectorType.ZAKELIJK_CORPORATE, SectorType.EVENEMENTEN_FEEST],
+    kvkNumber: "88291039",
+    vatNumber: "NL882910391B01",
+    products: [
+      { name: "Brand Video Commercial & Reclamespot", price: 2450, isTop5: true, description: "4K cinematic brand story video inclusief voice-over en grading." },
+      { name: "Product Shoot Pakket (20 studio shots)", price: 850, isTop5: true, description: "Professionele studiobelichting en beeldbewerking voor e-commerce." },
+      { name: "Social Media Reels Kwartaalpakket (12 video's)", price: 1750, isTop5: true, description: "Korte pakkende verticale video's voor Instagram en LinkedIn." },
+      { name: "Zakelijke Portretfotografie op Locatie (Team)", price: 650, isTop5: true, description: "Consistente portretten van directie en personeel." }
+    ]
+  },
+  {
+    slug: "veldhoen-vip-transport",
+    name: "Veldhoen VIP Transport & Logistics",
+    description: "Luxe directievervoer, evenementenpendels en express koeriersdiensten door heel de Benelux.",
+    logoUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://veldhoen-transport.nl",
+    city: "Utrecht",
+    address: "Kanaalweg 19, Utrecht",
+    latitude: 52.0789,
+    longitude: 5.1012,
+    serviceRadiusKm: 120,
+    availableStaff: 10,
+    clientCapacityPerProduct: 8,
+    isMarketplaceVisible: true,
+    primarySector: SectorType.AUTOMOTIVE_LOGISTIEK,
+    openForSectors: [SectorType.AUTOMOTIVE_LOGISTIEK, SectorType.ZAKELIJK_CORPORATE, SectorType.EVENEMENTEN_FEEST],
+    kvkNumber: "77391028",
+    vatNumber: "NL773910282B01",
+    products: [
+      { name: "VIP Chauffeur & Mercedes S-Klasse Daghuur", price: 890, isTop5: true, description: "Discreet vervoer voor directie, vips en speciale gasten." },
+      { name: "Evenementen Shuttle Bus (30 personen)", price: 1150, isTop5: true, description: "Pendeldienst tussen station, hotel en evenementenlocatie." },
+      { name: "Same-Day Beurs & Event Express Koerier", price: 340, isTop5: true, description: "Snelle levering van marketingmateriaal en beursonderdelen." }
+    ]
+  },
+  {
+    slug: "maison-beaute-wellness",
+    name: "Maison de Beauté & Lifestyle",
+    description: "High-end visagie, bruidsmake-up, haarstyling en ontspannende wellness arrangementen.",
+    logoUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://maisonbeaute.nl",
+    city: "Amsterdam",
+    address: "Van Baerlestraat 82, Amsterdam",
+    latitude: 52.3571,
+    longitude: 4.8789,
+    serviceRadiusKm: 40,
+    availableStaff: 4,
+    clientCapacityPerProduct: 5,
+    isMarketplaceVisible: true,
+    primarySector: SectorType.BEAUTY_LIFESTYLE,
+    openForSectors: [SectorType.BEAUTY_LIFESTYLE, SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST],
+    kvkNumber: "66291039",
+    vatNumber: "NL662910391B01",
+    products: [
+      { name: "Bruidsvisagie & Haarstyling Arrangement", price: 425, isTop5: true, description: "Inclusief proefsessie en touch-up pakket op de trouwdag." },
+      { name: "Event Glow Make-up & Hair (per persoon)", price: 145, isTop5: true, description: "Stralende look voor gala's, feesten en presentaties." },
+      { name: "Luxe Wellness & Relax Massage (90 min)", price: 120, isTop5: true, description: "Diepe ontspanning met natuurlijke aromatische oliën." }
+    ]
+  },
+  {
+    slug: "meesterschap-academy",
+    name: "Meesterschap Academy & Workshops",
+    description: "Inspirerende zakelijke masterclasses, leiderschapstrainingen en creatieve teambuilding workshops.",
+    logoUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://meesterschap-academy.nl",
+    city: "Eindhoven",
+    address: "Torenallee 20, Eindhoven",
+    latitude: 51.4485,
+    longitude: 5.4529,
+    serviceRadiusKm: 80,
+    availableStaff: 6,
+    clientCapacityPerProduct: 3,
+    isMarketplaceVisible: true,
+    primarySector: SectorType.ONDERWIJS_WORKSHOPS,
+    openForSectors: [SectorType.ONDERWIJS_WORKSHOPS, SectorType.ZAKELIJK_CORPORATE],
+    kvkNumber: "55392019",
+    vatNumber: "NL553920192B01",
+    products: [
+      { name: "Teambuilding & Innovatie Bootcamp (halve dag)", price: 1450, isTop5: true, description: "Interactieve werksessie voor teams tot 25 deelnemers." },
+      { name: "Masterclass Effectieve Communicatie & Onderhandelen", price: 1850, isTop5: true, description: "Praktijkgerichte training voor management en sales professionals." },
+      { name: "Gastcollege & Keynote Presentatie (60 min)", price: 950, isTop5: true, description: "Inspirerende opening of afsluiting van uw congres." }
+    ]
+  },
+  {
+    slug: "galerie-podium-artium",
+    name: "Galerie & Podium Artium Live Acts",
+    description: "Live muzikanten, akoestische ensembles, kunstexposities en theatrale acts voor exclusieve gelegenheden.",
+    logoUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://artium-entertainment.nl",
+    city: "Den Haag",
+    address: "Noordeinde 64, Den Haag",
+    latitude: 52.0812,
+    longitude: 4.3065,
+    serviceRadiusKm: 60,
+    availableStaff: 8,
+    clientCapacityPerProduct: 4,
+    isMarketplaceVisible: true,
+    primarySector: SectorType.KUNST_ENTERTAINMENT,
+    openForSectors: [SectorType.KUNST_ENTERTAINMENT, SectorType.EVENEMENTEN_FEEST, SectorType.BRUILOFT, SectorType.ZAKELIJK_CORPORATE],
+    kvkNumber: "44391028",
+    vatNumber: "NL443910281B01",
+    products: [
+      { name: "Akoestisch Jazz Trio (3 sets van 45 min)", price: 1350, isTop5: true, description: "Elegante achtergrondmuziek met contrabas, piano en zang." },
+      { name: "Live Event Painter / Snelschilder op Locatie", price: 850, isTop5: true, description: "Creëert ter plekke een prachtig schilderij van uw evenement." },
+      { name: "Klassiek Strijkkwartet voor Huwelijksceremonie", price: 1100, isTop5: true, description: "Tijdloze muzikale begeleiding van binnenkomst tot toost." }
     ]
   }
 ];
@@ -233,6 +363,7 @@ export async function enrichExistingCompanies() {
         serviceRadiusKm,
         availableStaff,
         clientCapacityPerProduct,
+        isMarketplaceVisible: comp.isMarketplaceVisible ?? true,
         latitude,
         longitude
       }
@@ -241,13 +372,13 @@ export async function enrichExistingCompanies() {
     // Populate opening hours if empty
     if (comp.openingHours.length === 0) {
       const days = [
-        { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Ma
-        { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Di
-        { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Wo
-        { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false }, // Do
-        { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false }, // Vr
-        { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false }, // Za
-        { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: comp.primarySector === SectorType.BOUW_RENOVATIE }, // Zo
+        { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false },
+        { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false },
+        { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false },
+        { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false },
+        { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false },
+        { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false },
+        { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: comp.primarySector === SectorType.BOUW_RENOVATIE },
       ];
 
       for (const d of days) {
@@ -290,240 +421,80 @@ export async function enrichExistingCompanies() {
       });
     }
   }
-}
 
-export async function ensureSeedData() {
-  const count = await prisma.company.count();
-  if (count > 0) {
-    await enrichExistingCompanies();
-    return { count, message: "Database already contains companies; enriched with slug, hours, reviews." };
-  }
-
-  // Create a default system / demo user for companies
-  let demoUser = await prisma.user.findFirst({
-    where: { email: "marktplein-demo@antoniuscore.nl" }
-  });
-
-  if (!demoUser) {
-    demoUser = await prisma.user.create({
-      data: {
-        name: "AntoniusCore Marktplein Demo",
-        email: "marktplein-demo@antoniuscore.nl"
-      }
-    });
-  }
-
-  const createdCompanies = [];
-
+  // Ensure any newly added sample companies are also created if missing
   for (let i = 0; i < SAMPLE_COMPANIES.length; i++) {
     const sc = SAMPLE_COMPANIES[i];
-
-    let user = await prisma.user.findFirst({
-      where: { email: `partner-${i + 1}@antoniuscore.nl` }
+    const exists = await prisma.company.findFirst({
+      where: {
+        OR: [{ slug: sc.slug }, { name: sc.name }]
+      }
     });
 
-    if (!user) {
-      user = await prisma.user.create({
+    if (!exists) {
+      let user = await prisma.user.findFirst({
+        where: { email: `partner-${sc.slug}@antoniuscore.nl` }
+      });
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            name: sc.name,
+            email: `partner-${sc.slug}@antoniuscore.nl`
+          }
+        });
+      }
+
+      await prisma.company.create({
         data: {
+          userId: user.id,
+          slug: sc.slug,
           name: sc.name,
-          email: `partner-${i + 1}@antoniuscore.nl`
+          description: sc.description,
+          logoUrl: sc.logoUrl,
+          websiteUrl: sc.websiteUrl,
+          city: sc.city,
+          address: sc.address,
+          latitude: sc.latitude,
+          longitude: sc.longitude,
+          serviceRadiusKm: sc.serviceRadiusKm,
+          availableStaff: sc.availableStaff,
+          clientCapacityPerProduct: sc.clientCapacityPerProduct,
+          isMarketplaceVisible: true,
+          primarySector: sc.primarySector,
+          openForSectors: sc.openForSectors,
+          kvkNumber: sc.kvkNumber,
+          vatNumber: sc.vatNumber,
+          products: {
+            create: sc.products.map(p => ({
+              name: p.name,
+              price: p.price,
+              description: p.description,
+              isTop5: p.isTop5
+            }))
+          },
+          openingHours: {
+            create: [
+              { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false },
+              { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false },
+              { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false },
+              { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false },
+              { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false },
+              { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false },
+              { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: false },
+            ]
+          },
+          reviews: {
+            create: [
+              { authorName: "Geverifieerde Klant", rating: 5, comment: "Topkwaliteit en vlot geregeld via het AntoniusCore portaal!" }
+            ]
+          }
         }
       });
     }
-
-    const company = await prisma.company.create({
-      data: {
-        userId: user.id,
-        slug: sc.slug,
-        name: sc.name,
-        description: sc.description,
-        logoUrl: sc.logoUrl,
-        websiteUrl: sc.websiteUrl,
-        city: sc.city,
-        address: sc.address,
-        latitude: sc.latitude,
-        longitude: sc.longitude,
-        serviceRadiusKm: sc.serviceRadiusKm,
-        availableStaff: sc.availableStaff,
-        clientCapacityPerProduct: sc.clientCapacityPerProduct,
-        primarySector: sc.primarySector,
-        openForSectors: sc.openForSectors,
-        kvkNumber: sc.kvkNumber,
-        vatNumber: sc.vatNumber,
-        products: {
-          create: sc.products.map(p => ({
-            name: p.name,
-            price: p.price,
-            description: p.description,
-            isTop5: p.isTop5
-          }))
-        },
-        openingHours: {
-          create: [
-            { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false },
-            { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false },
-            { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false },
-            { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false },
-            { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false },
-            { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false },
-            { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: sc.primarySector === SectorType.BOUW_RENOVATIE },
-          ]
-        },
-        reviews: {
-          create: [
-            { authorName: "Lotte de Boer", rating: 5, comment: "Topkwaliteit en vlot geregeld via het AntoniusCore portaal!" },
-            { authorName: "Klaas Visser", rating: 5, comment: "Professionele partij met heldere afspraken." }
-          ]
-        }
-      },
-      include: {
-        products: true
-      }
-    });
-
-    createdCompanies.push(company);
   }
+}
 
-  // Create curated cross-company Bundles
-  const weddingStyling = createdCompanies.find(c => c.name.includes("Atelier Rosa"));
-  const weddingPhoto = createdCompanies.find(c => c.name.includes("Château Moments"));
-  const eventSound = createdCompanies.find(c => c.name.includes("Lumina Stage"));
-  const eventStyling = createdCompanies.find(c => c.name.includes("FeestFabriek"));
-  const builder = createdCompanies.find(c => c.name.includes("Meesterbouwers"));
-  const ecoHeat = createdCompanies.find(c => c.name.includes("EcoHeat"));
-  const catering = createdCompanies.find(c => c.name.includes("Gusto Delizioso"));
-  const corporateBrand = createdCompanies.find(c => c.name.includes("Apex Corporate"));
-
-  // 1. Droombruiloft Bundel
-  if (weddingStyling && weddingPhoto) {
-    await prisma.bundle.create({
-      data: {
-        title: "Droombruiloft Totaalpakket (Styling & Fotografie)",
-        description: "De perfecte synergie voor uw huwelijksdag: complete fotoreportage gecombineerd met luxueuze ceremoniële styling.",
-        sector: SectorType.BRUILOFT,
-        price: 2450,
-        isPreMade: true,
-        companies: {
-          create: [
-            { companyId: weddingStyling.id },
-            { companyId: weddingPhoto.id }
-          ]
-        },
-        items: {
-          create: [
-            { productId: weddingStyling.products[0].id },
-            { productId: weddingStyling.products[1].id },
-            { productId: weddingPhoto.products[0].id }
-          ]
-        }
-      }
-    });
-  }
-
-  // 2. Festival & Feest Bundel
-  if (eventSound && eventStyling) {
-    await prisma.bundle.create({
-      data: {
-        title: "All-in-One Feest & Festival Sensatie",
-        description: "DJ Booth, Moving Head lichtshow, verlichte LED dansvloer en retro photobooth voor een onvergetelijke avond.",
-        sector: SectorType.EVENEMENTEN_FEEST,
-        price: 1980,
-        isPreMade: true,
-        companies: {
-          create: [
-            { companyId: eventSound.id },
-            { companyId: eventStyling.id }
-          ]
-        },
-        items: {
-          create: [
-            { productId: eventSound.products[0].id },
-            { productId: eventSound.products[1].id },
-            { productId: eventStyling.products[0].id },
-            { productId: eventStyling.products[1].id }
-          ]
-        }
-      }
-    });
-  }
-
-  // 3. Duurzaam Wonen Renovatie Bundel
-  if (builder && ecoHeat) {
-    await prisma.bundle.create({
-      data: {
-        title: "Compleet Duurzaam & Energieneutraal Woningpakket",
-        description: "Gecombineerde installatie van hybride warmtepomp, vloerverwarming én kunststof isolatiekozijnen.",
-        sector: SectorType.BOUW_RENOVATIE,
-        price: 11950,
-        isPreMade: true,
-        companies: {
-          create: [
-            { companyId: builder.id },
-            { companyId: ecoHeat.id }
-          ]
-        },
-        items: {
-          create: [
-            { productId: ecoHeat.products[0].id },
-            { productId: ecoHeat.products[1].id },
-            { productId: builder.products[1].id }
-          ]
-        }
-      }
-    });
-  }
-
-  // 4. Zakelijk Event & Catering Bundel
-  if (corporateBrand && catering) {
-    await prisma.bundle.create({
-      data: {
-        title: "Corporate Kick-off & Italiaans Walking Dinner",
-        description: "Versterk uw merk met een modulaire beursstand en verwen zakenrelaties met een 5-gangen live pasta buffet.",
-        sector: SectorType.ZAKELIJK_CORPORATE,
-        price: 4150,
-        isPreMade: true,
-        companies: {
-          create: [
-            { companyId: corporateBrand.id },
-            { companyId: catering.id }
-          ]
-        },
-        items: {
-          create: [
-            { productId: corporateBrand.products[0].id },
-            { productId: catering.products[0].id },
-            { productId: catering.products[1].id }
-          ]
-        }
-      }
-    });
-  }
-
-  // 5. Bruiloft Borrel & Bar Bundel
-  if (weddingStyling && catering) {
-    await prisma.bundle.create({
-      data: {
-        title: "Romantische Receptie & Champagne Bar",
-        description: "Styling van receptietafels gecombineerd met antipasti grazing table en mobiele espressobar.",
-        sector: SectorType.CATERING_HORECA,
-        price: 1350,
-        isPreMade: true,
-        companies: {
-          create: [
-            { companyId: weddingStyling.id },
-            { companyId: catering.id }
-          ]
-        },
-        items: {
-          create: [
-            { productId: weddingStyling.products[1].id },
-            { productId: catering.products[1].id },
-            { productId: catering.products[3].id }
-          ]
-        }
-      }
-    });
-  }
-
-  return { count: createdCompanies.length, message: "Seed data created successfully." };
+export async function ensureSeedData() {
+  await enrichExistingCompanies();
+  return { message: "Seed data created and enriched successfully." };
 }

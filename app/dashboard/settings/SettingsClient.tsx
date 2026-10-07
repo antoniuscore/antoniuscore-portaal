@@ -29,36 +29,56 @@ interface SettingsClientProps {
   userEmail: string;
 }
 
-const ALL_SECTORS: { type: SectorType; label: string; icon: string; desc: string }[] = [
+const ALL_SECTORS: { type: SectorType; label: string; desc: string }[] = [
   {
     type: "BRUILOFT",
     label: "Bruiloft & Romantiek",
-    icon: "💒",
     desc: "Styling, fotografie, bloemen, ceremoniële diensten en bruidsmode.",
   },
   {
     type: "EVENEMENTEN_FEEST",
     label: "Evenementen & Feest",
-    icon: "🎉",
     desc: "Licht, geluid, photobooths, partyverhuur, DJ's en artiesten.",
   },
   {
     type: "BOUW_RENOVATIE",
     label: "Bouw & Renovatie",
-    icon: "🔨",
     desc: "Aannemers, kozijnen, warmtepompen, installatietechniek en interieurbouw.",
   },
   {
     type: "ZAKELIJK_CORPORATE",
     label: "Zakelijk & Corporate",
-    icon: "💼",
     desc: "Beursstands, bedrijfsvideo's, relatiegeschenken en zakelijke signing.",
   },
   {
     type: "CATERING_HORECA",
     label: "Catering & Horeca",
-    icon: "🍽️",
     desc: "Buffetten, live cooking, mobiele cocktail- & koffiebars en walking dinners.",
+  },
+  {
+    type: "MARKETING_MEDIA_FOTOGRAFIE",
+    label: "Marketing, Media & Fotografie",
+    desc: "Bedrijfsvideo's, reclamecampagnes, commerciële shoots en social media content.",
+  },
+  {
+    type: "AUTOMOTIVE_LOGISTIEK",
+    label: "Automotive & Transport",
+    desc: "VIP directievervoer, evenementenshuttles, expresskoeriers en fleet services.",
+  },
+  {
+    type: "BEAUTY_LIFESTYLE",
+    label: "Beauty & Lifestyle",
+    desc: "Visagie, haarstyling voor bruiloften en events, wellness en persoonlijke verzorging.",
+  },
+  {
+    type: "ONDERWIJS_WORKSHOPS",
+    label: "Onderwijs & Workshops",
+    desc: "Zakelijke masterclasses, teambuilding sessies, bedrijfstrainingen en gastcolleges.",
+  },
+  {
+    type: "KUNST_ENTERTAINMENT",
+    label: "Kunst & Entertainment",
+    desc: "Live acts, akoestische ensembles, live painters, theatervoorstellingen en exposities.",
   },
 ];
 
@@ -371,9 +391,7 @@ export default function SettingsClient({
                         : "bg-slate-950 border-slate-800 hover:border-slate-700"
                     }`}
                   >
-                    <span className="text-2xl p-2 rounded-lg bg-slate-900 border border-slate-800">
-                      {sec.icon}
-                    </span>
+                    <span className="w-4 h-4 rounded-full bg-rose-500/30 border border-rose-500/50 shrink-0 mt-0.5" />
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-white text-xs">
@@ -422,7 +440,7 @@ export default function SettingsClient({
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-lg">{sec.icon}</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-400 shrink-0" />
                       <span className="text-xs font-semibold text-slate-200">
                         {sec.label}
                       </span>

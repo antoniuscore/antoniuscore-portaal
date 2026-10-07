@@ -85,12 +85,17 @@ interface CompanyDetailProps {
 
 const DAYS_NAME = ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"];
 
-const SECTOR_META: Record<SectorType, { label: string; icon: string; roofStyle: string }> = {
-  BRUILOFT: { label: "Bruiloft & Romantiek", icon: "💒", roofStyle: "from-purple-600 to-white" },
-  EVENEMENTEN_FEEST: { label: "Evenementen & Feest", icon: "🎉", roofStyle: "from-red-600 to-white" },
-  BOUW_RENOVATIE: { label: "Bouw & Renovatie", icon: "🔨", roofStyle: "from-amber-800 to-amber-600" },
-  ZAKELIJK_CORPORATE: { label: "Zakelijk & Corporate", icon: "💼", roofStyle: "from-blue-600 to-white" },
-  CATERING_HORECA: { label: "Catering & Horeca", icon: "🍽️", roofStyle: "from-emerald-600 to-white" },
+const SECTOR_META: Record<SectorType, { label: string; roofColor: string }> = {
+  BRUILOFT: { label: "Bruiloft & Romantiek", roofColor: "#7c3aed" },
+  EVENEMENTEN_FEEST: { label: "Evenementen & Feest", roofColor: "#b91c1c" },
+  BOUW_RENOVATIE: { label: "Bouw & Renovatie", roofColor: "#78350f" },
+  ZAKELIJK_CORPORATE: { label: "Zakelijk & Corporate", roofColor: "#1e40af" },
+  CATERING_HORECA: { label: "Catering & Horeca", roofColor: "#15803d" },
+  MARKETING_MEDIA_FOTOGRAFIE: { label: "Marketing, Media & Fotografie", roofColor: "#c2410c" },
+  AUTOMOTIVE_LOGISTIEK: { label: "Automotive & Logistiek", roofColor: "#334155" },
+  BEAUTY_LIFESTYLE: { label: "Beauty & Lifestyle", roofColor: "#be185d" },
+  ONDERWIJS_WORKSHOPS: { label: "Onderwijs & Workshops", roofColor: "#d97706" },
+  KUNST_ENTERTAINMENT: { label: "Kunst & Entertainment", roofColor: "#581c87" },
 };
 
 export default function CompanyDetailClient({
@@ -156,7 +161,7 @@ export default function CompanyDetailClient({
 
       setAuthorName("");
       setComment("");
-      setReviewMessage("Bedankt voor je review! Je beoordeling is geplaatst.");
+      setReviewMessage("Bedankt voor je review. Je beoordeling is succesvol geplaatst.");
     } catch (err: any) {
       setReviewMessage(`Fout: ${err.message}`);
     } finally {
@@ -199,23 +204,22 @@ export default function CompanyDetailClient({
     }
   };
 
-  const meta = SECTOR_META[company.primarySector];
+  const meta = SECTOR_META[company.primarySector] || { label: company.primarySector, roofColor: "#4a2810" };
 
   return (
-    <div className="min-h-screen bg-[#e4c158] text-[#2d1808] font-sans pb-16">
+    <div className="min-h-screen bg-[#dfbc53] text-[#2d1808] font-sans pb-16">
       {/* 1. Header Navigation */}
       <header className="bg-[#cfa844] border-b-4 border-[#4a2810] py-3 px-4 shadow-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1.5"
+            className="pixel-btn-wood px-3.5 py-1.5 rounded text-xs font-bold"
           >
-            <span>←</span>
-            <span>Terug naar Marktplein</span>
+            ← Terug naar Marktplein
           </Link>
 
           <span className="font-mono font-black text-sm text-[#3b1d09] tracking-wider uppercase hidden sm:inline">
-            🎪 AntoniusCore Bedrijfspagina
+            AntoniusCore Bedrijfsprofiel
           </span>
 
           <button
@@ -225,47 +229,42 @@ export default function CompanyDetailClient({
             }}
             className="pixel-btn-red px-4 py-1.5 rounded text-xs font-black uppercase tracking-wider"
           >
-            ✉️ Contact & Offerte
+            Contact & Offerte
           </button>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
-        {/* 2. Hero Banner in Stardew Valley Style */}
+        {/* 2. Hero Banner */}
         <div className="pixel-box-parchment p-6 sm:p-8 relative">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b-2 border-[#7c481f]">
-            <div className="flex items-start gap-4">
-              <span className="text-4xl p-3 bg-[#edd378] border-2 border-[#7c481f] rounded-xl shadow-inner shrink-0">
-                {meta.icon}
-              </span>
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-[#edd378] text-[#4a2810] border border-[#7c481f]">
-                    {meta.label}
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-[#edd378] text-[#4a2810] border border-[#7c481f]">
+                  {meta.label}
+                </span>
+                {isOpenNow ? (
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                    Nu Geopend
                   </span>
-                  {isOpenNow ? (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-400 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Nu Geopend
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-rose-100 text-rose-800 border border-rose-400">
-                      Nu Gesloten
-                    </span>
-                  )}
-                  <span className="text-xs font-mono font-bold text-[#b45309]">
-                    ★ {avgRating} ({reviewsList.length} reviews)
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-rose-100 text-rose-800 border border-rose-400">
+                    Nu Gesloten
                   </span>
-                </div>
-
-                <h1 className="font-mono font-black text-2xl sm:text-3xl text-[#3b1d09]">
-                  {company.name}
-                </h1>
-
-                <p className="text-xs sm:text-sm text-[#5c3011] mt-2 max-w-2xl leading-relaxed">
-                  {company.description || "Geverifieerde partner op het AntoniusCore Marktplein."}
-                </p>
+                )}
+                <span className="text-xs font-mono font-bold text-[#b45309] bg-[#fff4d4] px-2 py-0.5 rounded border border-[#ba793a]">
+                  Score: {avgRating} / 5.0 ({reviewsList.length} reviews)
+                </span>
               </div>
+
+              <h1 className="font-mono font-black text-2xl sm:text-3xl text-[#3b1d09]">
+                {company.name}
+              </h1>
+
+              <p className="text-xs sm:text-sm text-[#5c3011] mt-2 max-w-2xl leading-relaxed">
+                {company.description || "Geverifieerde partner op het AntoniusCore Marktplein."}
+              </p>
             </div>
 
             {/* Quick Actions / Website Link */}
@@ -275,10 +274,9 @@ export default function CompanyDetailClient({
                   href={company.websiteUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="pixel-btn-wood px-4 py-2 rounded text-xs font-bold flex items-center gap-2 text-center justify-center"
+                  className="pixel-btn-wood px-4 py-2 rounded text-xs font-bold text-center justify-center"
                 >
-                  <span>🌐</span>
-                  <span>Bezoek Website</span>
+                  Bezoek Officiële Website
                 </a>
               )}
               <button
@@ -288,7 +286,7 @@ export default function CompanyDetailClient({
                 }}
                 className="pixel-btn-red px-5 py-2.5 rounded text-xs font-black uppercase tracking-wider text-center"
               >
-                ✉️ Vrijblijvende Offerte
+                Vrijblijvende Offerte Aanvragen
               </button>
             </div>
           </div>
@@ -297,7 +295,7 @@ export default function CompanyDetailClient({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 text-xs">
             <div className="p-3 rounded bg-[#fff4d4] border border-[#ba793a]">
               <span className="text-[#7c481f] font-bold block text-[10px] uppercase">
-                📍 Vestiging
+                Vestiging
               </span>
               <span className="font-bold text-[#3b1d09] text-sm">
                 {company.city || "Amsterdam"}
@@ -309,10 +307,10 @@ export default function CompanyDetailClient({
 
             <div className="p-3 rounded bg-[#fff4d4] border border-[#ba793a]">
               <span className="text-[#7c481f] font-bold block text-[10px] uppercase">
-                🚚 Leveringsgebied
+                Leveringsgebied
               </span>
               <span className="font-bold text-[#3b1d09] text-sm">
-                {company.serviceRadiusKm ?? 35} km straal
+                {company.serviceRadiusKm ?? 35} km actieradius
               </span>
               <span className="text-[10px] text-[#7c481f] block">
                 Rondom {company.city || "regio"}
@@ -321,7 +319,7 @@ export default function CompanyDetailClient({
 
             <div className="p-3 rounded bg-[#fff4d4] border border-[#ba793a]">
               <span className="text-[#7c481f] font-bold block text-[10px] uppercase">
-                👥 Personeel
+                Personeel
               </span>
               <span className="font-bold text-[#3b1d09] text-sm">
                 {company.availableStaff ?? 2} medewerkers
@@ -333,7 +331,7 @@ export default function CompanyDetailClient({
 
             <div className="p-3 rounded bg-[#fff4d4] border border-[#ba793a]">
               <span className="text-[#7c481f] font-bold block text-[10px] uppercase">
-                📦 Klantcapaciteit
+                Klantcapaciteit
               </span>
               <span className="font-bold text-[#3b1d09] text-sm">
                 Max {company.clientCapacityPerProduct ?? 5} / dag
@@ -349,8 +347,8 @@ export default function CompanyDetailClient({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-mono font-black text-xl text-[#3b1d09] flex items-center gap-2">
-                <span>📦</span> Uitgebreide Catalogus & Diensten
+              <h2 className="font-mono font-black text-xl text-[#3b1d09]">
+                Catalogus & Diensten
               </h2>
               <p className="text-xs text-[#63320f]">
                 Overzicht van alle losse diensten en producten van {company.name}.
@@ -374,7 +372,7 @@ export default function CompanyDetailClient({
                     </h3>
                     {prod.isTop5 && (
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-[#fef3c7] text-[#92400e] border border-[#f59e0b] shrink-0">
-                        🏆 Top 5
+                        Top 5
                       </span>
                     )}
                   </div>
@@ -406,8 +404,8 @@ export default function CompanyDetailClient({
         {company.bundles.length > 0 && (
           <section className="space-y-4">
             <div>
-              <h2 className="font-mono font-black text-xl text-[#3b1d09] flex items-center gap-2">
-                <span>🤝</span> Samenwerkingsbundels met Partners
+              <h2 className="font-mono font-black text-xl text-[#3b1d09]">
+                Samenwerkingsbundels met Partners
               </h2>
               <p className="text-xs text-[#63320f]">
                 Voordeelpakketten samengesteld met partners in en rondom {company.city || "de regio"}.
@@ -447,7 +445,7 @@ export default function CompanyDetailClient({
                             key={bc.company.id}
                             className="px-2 py-0.5 rounded bg-white border border-[#c4b5fd] text-[10px] font-bold text-[#4c1d95]"
                           >
-                            🏢 {bc.company.name}
+                            {bc.company.name}
                           </span>
                         ))}
                       </div>
@@ -474,8 +472,8 @@ export default function CompanyDetailClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Openingstijden */}
           <div className="pixel-box-parchment p-5">
-            <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3 flex items-center gap-2">
-              <span>⏰</span> Openingstijden & Bereikbaarheid
+            <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-3">
+              Openingstijden & Bereikbaarheid
             </h3>
 
             <div className="space-y-1.5 text-xs">
@@ -492,9 +490,8 @@ export default function CompanyDetailClient({
                         : "bg-[#fff4d4]"
                     }`}
                   >
-                    <span className="flex items-center gap-1.5">
-                      {isToday && <span>👉</span>}
-                      <span>{name}</span>
+                    <span className="font-medium">
+                      {name} {isToday && "(Vandaag)"}
                     </span>
 
                     <span>
@@ -515,8 +512,8 @@ export default function CompanyDetailClient({
           {/* Aanbevolen Partners */}
           <div className="pixel-box-parchment p-5 flex flex-col justify-between">
             <div>
-              <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2 flex items-center gap-2">
-                <span>⭐</span> Aanbevolen Marktpartners
+              <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2">
+                Aanbevolen Marktpartners
               </h3>
               <p className="text-xs text-[#7c481f] mb-3">
                 Bedrijven op het marktplein die {company.name} aanbeveelt voor complete projecten.
@@ -540,7 +537,7 @@ export default function CompanyDetailClient({
                           {rp.primarySector} • {rp.city || "Nederland"}
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-[#8a4b1f]">Bekijk →</span>
+                      <span className="text-xs font-bold text-[#8a4b1f]">Bekijk Profiel →</span>
                     </Link>
                   ))}
                 </div>
@@ -557,8 +554,8 @@ export default function CompanyDetailClient({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-mono font-black text-xl text-[#3b1d09] flex items-center gap-2">
-                <span>💬</span> Reviews & Klantbeoordelingen
+              <h2 className="font-mono font-black text-xl text-[#3b1d09]">
+                Reviews & Klantbeoordelingen
               </h2>
               <p className="text-xs text-[#63320f]">
                 Ervaringen van consumenten en zakelijke partners.
@@ -574,7 +571,7 @@ export default function CompanyDetailClient({
             <div className="space-y-3">
               {reviewsList.length === 0 ? (
                 <div className="p-4 rounded bg-[#fff8e7] border-2 border-[#7c481f] text-xs text-[#7c481f] italic text-center">
-                  Nog geen reviews geschreven. Wees de eerste!
+                  Nog geen reviews geschreven.
                 </div>
               ) : (
                 reviewsList.map((rev) => (
@@ -584,9 +581,8 @@ export default function CompanyDetailClient({
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-[#3b1d09]">{rev.authorName}</span>
-                      <span className="text-amber-600 font-bold">
-                        {"★".repeat(rev.rating)}
-                        {"☆".repeat(5 - rev.rating)}
+                      <span className="text-amber-700 font-bold font-mono">
+                        {rev.rating} / 5 sterren
                       </span>
                     </div>
                     {rev.comment && (
@@ -599,8 +595,8 @@ export default function CompanyDetailClient({
 
             {/* Submit a Review Form */}
             <div className="pixel-box-wood p-5 bg-[#fff8e7]">
-              <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2 flex items-center gap-1.5">
-                <span>✍️</span> Schrijf een Beoordeling
+              <h3 className="font-mono font-black text-sm uppercase text-[#4a2810] mb-2">
+                Schrijf een Beoordeling
               </h3>
 
               {reviewMessage && (
@@ -626,18 +622,18 @@ export default function CompanyDetailClient({
 
                 <div>
                   <label className="block font-bold text-[#4a2810] mb-1">
-                    Beoordeling (Aantal Sterren)
+                    Beoordeling
                   </label>
                   <select
                     value={rating}
                     onChange={(e) => setRating(Number(e.target.value))}
                     className="w-full bg-[#fff4d4] border-2 border-[#7c481f] rounded px-3 py-1.5 text-xs font-bold"
                   >
-                    <option value={5}>★★★★★ (5 - Uitstekend)</option>
-                    <option value={4}>★★★★☆ (4 - Zeer goed)</option>
-                    <option value={3}>★★★☆☆ (3 - Gemiddeld)</option>
-                    <option value={2}>★★☆☆☆ (2 - Matig)</option>
-                    <option value={1}>★☆☆☆☆ (1 - Onvoldoende)</option>
+                    <option value={5}>5 sterren (Uitstekend)</option>
+                    <option value={4}>4 sterren (Zeer goed)</option>
+                    <option value={3}>3 sterren (Gemiddeld)</option>
+                    <option value={2}>2 sterren (Matig)</option>
+                    <option value={1}>1 ster (Onvoldoende)</option>
                   </select>
                 </div>
 
@@ -659,7 +655,7 @@ export default function CompanyDetailClient({
                   disabled={isSubmittingReview}
                   className="pixel-btn-red w-full py-2.5 rounded text-xs font-black uppercase tracking-wider disabled:opacity-50"
                 >
-                  {isSubmittingReview ? "Review Plaatsen..." : "Plaats Review"}
+                  {isSubmittingReview ? "Review Plaatsen..." : "Plaats Beoordeling"}
                 </button>
               </form>
             </div>
@@ -681,25 +677,19 @@ export default function CompanyDetailClient({
               ✕
             </button>
 
-            <div className="flex items-center gap-2.5 pb-4 border-b-2 border-[#7c481f] mb-4">
-              <span className="text-2xl p-2 bg-[#edd378] border-2 border-[#7c481f] rounded">
-                ✉️
-              </span>
-              <div>
-                <h3 className="font-mono font-black text-lg text-[#3b1d09]">
-                  OFFERTE / CONTACT AANVRAAG
-                </h3>
-                <p className="text-xs text-[#7c481f] font-semibold">
-                  Direct contact met {company.name}
-                </p>
-              </div>
+            <div className="pb-4 border-b-2 border-[#7c481f] mb-4">
+              <h3 className="font-mono font-black text-lg text-[#3b1d09]">
+                OFFERTE & CONTACT AANVRAAG
+              </h3>
+              <p className="text-xs text-[#7c481f] font-semibold">
+                Direct contact met {company.name}
+              </p>
             </div>
 
             {inquirySuccess ? (
               <div className="text-center py-8 space-y-3">
-                <span className="text-4xl">🎉</span>
                 <h4 className="font-mono font-black text-lg text-emerald-800">
-                  AANVRAAG ONTVANGEN!
+                  AANVRAAG ONTVANGEN
                 </h4>
                 <p className="text-xs text-emerald-700 max-w-xs mx-auto">
                   {company.name} heeft jouw verzoek ontvangen en zal spoedig contact opnemen.
@@ -751,13 +741,13 @@ export default function CompanyDetailClient({
 
                 <div>
                   <label className="block font-bold text-[#4a2810] mb-1">
-                    Gewenste datum of opmerking
+                    Gewenste datum of toelichting
                   </label>
                   <textarea
                     rows={3}
                     value={contactNotes}
                     onChange={(e) => setContactNotes(e.target.value)}
-                    placeholder="Geef hier details over uw project, gewenste datum of locatie..."
+                    placeholder="Geef hier details over uw project, gewenste datum of planning..."
                     className="w-full bg-[#fff4d4] border-2 border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#4a2810]"
                   />
                 </div>
@@ -767,7 +757,7 @@ export default function CompanyDetailClient({
                   disabled={isSendingInquiry}
                   className="pixel-btn-red w-full py-3 rounded text-xs font-black uppercase tracking-wider transition disabled:opacity-50 cursor-pointer shadow-lg mt-2"
                 >
-                  {isSendingInquiry ? "Verzenden..." : "✉️ Verstuur Aanvraag"}
+                  {isSendingInquiry ? "Verzenden..." : "Verstuur Aanvraag"}
                 </button>
               </form>
             )}

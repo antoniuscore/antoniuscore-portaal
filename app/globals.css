@@ -94,23 +94,18 @@ body {
   transform: translateY(-1px);
 }
 
-/* Desert Sand & Cobblestone Tile Pattern */
+/* Clean, Warm Sand Texture Background */
 .bg-desert-market {
-  background-color: #e4c158;
+  background-color: #dfbc53;
   background-image: 
-    radial-gradient(#cca440 18%, transparent 19%),
-    radial-gradient(#edd378 18%, transparent 19%);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.04) 100%),
+    radial-gradient(circle at 50% 20%, #ebce73 0%, #d8b449 100%);
 }
 
-/* Cobblestone Market Square Ground */
+/* Subtle Cobblestone Market Square Ground */
 .market-cobblestone {
-  background-color: #d9b85c;
-  background-image: 
-    linear-gradient(rgba(100, 70, 20, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(100, 70, 20, 0.15) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-color: rgba(197, 161, 71, 0.25);
+  border-color: rgba(120, 80, 20, 0.15);
 }
 
 /* Walking character bobbing animation */
