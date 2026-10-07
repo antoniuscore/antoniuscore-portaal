@@ -83,21 +83,55 @@ model Deal {
 }
 
 model Company {
-  id             String                 @id @default(cuid())
-  userId         String                 @unique
-  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name           String
-  description    String?
-  logoUrl        String?
-  kvkNumber      String?
-  vatNumber      String?
-  address        String?
-  primarySector  SectorType
-  openForSectors SectorType[]
-  products       Product[]
-  bundles        BundleCompany[]
-  customRequests CustomRequestCompany[]
-  createdAt      DateTime               @default(now())
+  id                        String                 @id @default(cuid())
+  userId                    String                 @unique
+  user                      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug                      String?                @unique
+  name                      String
+  description               String?
+  logoUrl                   String?
+  websiteUrl                String?
+  city                      String?
+  latitude                  Float?
+  longitude                 Float?
+  serviceRadiusKm           Int?                   @default(30)
+  availableStaff            Int?                   @default(1)
+  clientCapacityPerProduct   Int?                   @default(5)
+  recommendedCompanies      String[]               @default([])
+  blacklistedCompanies      String[]               @default([])
+  kvkNumber                 String?
+  vatNumber                 String?
+  address                   String?
+  primarySector             SectorType
+  openForSectors            SectorType[]
+  openingHours              OpeningHour[]
+  reviews                   Review[]
+  products                  Product[]
+  bundles                   BundleCompany[]
+  customRequests            CustomRequestCompany[]
+  createdAt                 DateTime               @default(now())
+}
+
+model OpeningHour {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  dayOfWeek Int      // 0 = Zondag, 1 = Maandag, ... 6 = Zaterdag
+  openTime  String   // e.g. "09:00"
+  closeTime String   // e.g. "18:00"
+  isClosed  Boolean  @default(false)
+
+  @@unique([companyId, dayOfWeek])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  authorName String
+  rating     Int      @default(5)
+  comment    String?
+  createdAt  DateTime @default(now())
 }
 
 model Product {

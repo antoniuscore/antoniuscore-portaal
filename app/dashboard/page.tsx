@@ -42,18 +42,24 @@ export default async function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/shop"
-            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-rose-500 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2"
+            href="/"
+            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2"
           >
-            <span>🎪</span> Bekijk Marktplein
+            <span>🎪</span> 2D Marktplein
+          </Link>
+          <Link
+            href="/dashboard/profile"
+            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2"
+          >
+            <span>📍</span> Profiel & Capaciteit
           </Link>
           <Link
             href="/dashboard/settings"
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-900/30 flex items-center gap-2"
           >
-            <span>⚙️</span> Marktplein & Sector Instellingen
+            <span>⚙️</span> Sector & Producten
           </Link>
         </div>
       </div>

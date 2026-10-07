@@ -3,12 +3,20 @@ import { SectorType } from "@prisma/client";
 
 export const SAMPLE_COMPANIES = [
   {
+    slug: "atelier-rosa-bruidsmode",
     name: "Atelier Rosa Bruidsmode & Styling",
     description: "Exclusieve trouw- en feeststyling met oog voor detail. Van ceremoniële bloemenbogen tot complete zaaldecoratie.",
     logoUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://atelier-rosa.nl",
+    city: "Amsterdam",
+    address: "Keizersgracht 420, Amsterdam",
+    latitude: 52.3702,
+    longitude: 4.8952,
+    serviceRadiusKm: 45,
+    availableStaff: 4,
+    clientCapacityPerProduct: 3,
     primarySector: SectorType.BRUILOFT,
     openForSectors: [SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.CATERING_HORECA],
-    address: "Keizersgracht 420, Amsterdam",
     kvkNumber: "84729103",
     vatNumber: "NL847291032B01",
     products: [
@@ -21,12 +29,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "chateau-moments-fotografie",
     name: "Château Moments Fotografie",
     description: "Cinematische huwelijks- en portretfotografie met liefde voor spontane en emotionele momenten.",
     logoUrl: "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://chateaumoments.nl",
+    city: "Utrecht",
+    address: "Singel 112, Utrecht",
+    latitude: 52.0907,
+    longitude: 5.1214,
+    serviceRadiusKm: 60,
+    availableStaff: 2,
+    clientCapacityPerProduct: 2,
     primarySector: SectorType.BRUILOFT,
     openForSectors: [SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.ZAKELIJK_CORPORATE],
-    address: "Singel 112, Utrecht",
     kvkNumber: "75839201",
     vatNumber: "NL758392011B01",
     products: [
@@ -38,12 +54,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "lumina-stage-sound",
     name: "Lumina Stage & Sound Systems",
     description: "Professionele geluids-, licht- en podiumtechniek voor festivals, bruiloften en grote bedrijfsevenementen.",
     logoUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://lumina-events.nl",
+    city: "Rotterdam",
+    address: "Industrieweg 18, Rotterdam",
+    latitude: 51.9244,
+    longitude: 4.4777,
+    serviceRadiusKm: 80,
+    availableStaff: 6,
+    clientCapacityPerProduct: 5,
     primarySector: SectorType.EVENEMENTEN_FEEST,
     openForSectors: [SectorType.EVENEMENTEN_FEEST, SectorType.BRUILOFT, SectorType.ZAKELIJK_CORPORATE],
-    address: "Industrieweg 18, Rotterdam",
     kvkNumber: "64910283",
     vatNumber: "NL649102831B01",
     products: [
@@ -55,12 +79,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "feestfabriek-styling",
     name: "FeestFabriek Event Styling & Photobooths",
     description: "De finishing touch voor elk feest: interactieve photobooths, spectaculaire ballonpilaren en lounge hoeken.",
     logoUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://feestfabriek.nl",
+    city: "Den Haag",
+    address: "Willem de Zwijgerlaan 88, Den Haag",
+    latitude: 52.0705,
+    longitude: 4.3007,
+    serviceRadiusKm: 40,
+    availableStaff: 4,
+    clientCapacityPerProduct: 4,
     primarySector: SectorType.EVENEMENTEN_FEEST,
     openForSectors: [SectorType.EVENEMENTEN_FEEST, SectorType.BRUILOFT, SectorType.CATERING_HORECA],
-    address: "Willem de Zwijgerlaan 88, Den Haag",
     kvkNumber: "59382019",
     vatNumber: "NL593820192B01",
     products: [
@@ -72,12 +104,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "meesterbouwers-kozijnen",
     name: "De Meesterbouwers & Kozijnen",
     description: "Vakkundige aannemers voor hoogwaardige renovaties, uitbouwen, kozijnen en interieurbouw.",
     logoUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://meesterbouwers.nl",
+    city: "Eindhoven",
+    address: "Ambachtstraat 9, Eindhoven",
+    latitude: 51.4416,
+    longitude: 5.4697,
+    serviceRadiusKm: 50,
+    availableStaff: 12,
+    clientCapacityPerProduct: 8,
     primarySector: SectorType.BOUW_RENOVATIE,
     openForSectors: [SectorType.BOUW_RENOVATIE, SectorType.ZAKELIJK_CORPORATE],
-    address: "Ambachtstraat 9, Eindhoven",
     kvkNumber: "48201928",
     vatNumber: "NL482019281B01",
     products: [
@@ -89,12 +129,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "ecoheat-installaties",
     name: "EcoHeat & Duurzaam Installatietechniek",
     description: "Gecertificeerde installateurs voor warmtepompen, vloerverwarming en slimme zonne-energiesystemen.",
     logoUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://ecoheat-duurzaam.nl",
+    city: "Breda",
+    address: "Energieweg 14, Breda",
+    latitude: 51.5719,
+    longitude: 4.7683,
+    serviceRadiusKm: 45,
+    availableStaff: 8,
+    clientCapacityPerProduct: 6,
     primarySector: SectorType.BOUW_RENOVATIE,
     openForSectors: [SectorType.BOUW_RENOVATIE, SectorType.ZAKELIJK_CORPORATE],
-    address: "Energieweg 14, Breda",
     kvkNumber: "39102948",
     vatNumber: "NL391029482B01",
     products: [
@@ -106,12 +154,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "apex-branding-standbouw",
     name: "Apex Corporate Branding & Standbouw",
     description: "B2B specialisten in beursstands, corporate identiteit, signing en exclusieve relatiegeschenken.",
     logoUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://apex-corporate.nl",
+    city: "Amsterdam",
+    address: "Zuidas Kennedylaan 100, Amsterdam",
+    latitude: 52.34,
+    longitude: 4.87,
+    serviceRadiusKm: 100,
+    availableStaff: 5,
+    clientCapacityPerProduct: 4,
     primarySector: SectorType.ZAKELIJK_CORPORATE,
     openForSectors: [SectorType.ZAKELIJK_CORPORATE, SectorType.EVENEMENTEN_FEEST, SectorType.CATERING_HORECA],
-    address: "Zuidas Kennedylaan 100, Amsterdam",
     kvkNumber: "29103948",
     vatNumber: "NL291039481B01",
     products: [
@@ -123,12 +179,20 @@ export const SAMPLE_COMPANIES = [
     ]
   },
   {
+    slug: "gusto-delizioso-catering",
     name: "Gusto Delizioso Italiaanse Catering",
     description: "Authentieke Italiaanse catering met live cooking, walking dinners en feestelijke buffetten voor elk gezelschap.",
     logoUrl: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=400&q=80",
+    websiteUrl: "https://gustodelizioso.nl",
+    city: "Utrecht",
+    address: "Pannenhuisstraat 24, Utrecht",
+    latitude: 52.08,
+    longitude: 5.11,
+    serviceRadiusKm: 55,
+    availableStaff: 9,
+    clientCapacityPerProduct: 10,
     primarySector: SectorType.CATERING_HORECA,
     openForSectors: [SectorType.CATERING_HORECA, SectorType.BRUILOFT, SectorType.EVENEMENTEN_FEEST, SectorType.ZAKELIJK_CORPORATE],
-    address: "Pannenhuisstraat 24, Utrecht",
     kvkNumber: "19203948",
     vatNumber: "NL192039482B01",
     products: [
@@ -141,10 +205,98 @@ export const SAMPLE_COMPANIES = [
   }
 ];
 
+export async function enrichExistingCompanies() {
+  const existing = await prisma.company.findMany({
+    include: { openingHours: true, reviews: true }
+  });
+
+  for (const comp of existing) {
+    const matchingSample = SAMPLE_COMPANIES.find(
+      s => s.name.toLowerCase() === comp.name.toLowerCase() || comp.name.toLowerCase().includes(s.slug.split("-")[0])
+    );
+
+    const generatedSlug = comp.slug || (matchingSample?.slug ?? comp.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""));
+    const city = comp.city || matchingSample?.city || "Amsterdam";
+    const websiteUrl = comp.websiteUrl || matchingSample?.websiteUrl || `https://${generatedSlug}.nl`;
+    const serviceRadiusKm = comp.serviceRadiusKm ?? matchingSample?.serviceRadiusKm ?? 35;
+    const availableStaff = comp.availableStaff ?? matchingSample?.availableStaff ?? 3;
+    const clientCapacityPerProduct = comp.clientCapacityPerProduct ?? matchingSample?.clientCapacityPerProduct ?? 5;
+    const latitude = comp.latitude ?? matchingSample?.latitude ?? 52.37;
+    const longitude = comp.longitude ?? matchingSample?.longitude ?? 4.89;
+
+    await prisma.company.update({
+      where: { id: comp.id },
+      data: {
+        slug: generatedSlug,
+        city,
+        websiteUrl,
+        serviceRadiusKm,
+        availableStaff,
+        clientCapacityPerProduct,
+        latitude,
+        longitude
+      }
+    });
+
+    // Populate opening hours if empty
+    if (comp.openingHours.length === 0) {
+      const days = [
+        { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Ma
+        { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Di
+        { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false }, // Wo
+        { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false }, // Do
+        { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false }, // Vr
+        { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false }, // Za
+        { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: comp.primarySector === SectorType.BOUW_RENOVATIE }, // Zo
+      ];
+
+      for (const d of days) {
+        await prisma.openingHour.upsert({
+          where: {
+            companyId_dayOfWeek: {
+              companyId: comp.id,
+              dayOfWeek: d.dayOfWeek
+            }
+          },
+          update: {},
+          create: {
+            companyId: comp.id,
+            dayOfWeek: d.dayOfWeek,
+            openTime: d.openTime,
+            closeTime: d.closeTime,
+            isClosed: d.isClosed
+          }
+        });
+      }
+    }
+
+    // Populate reviews if empty
+    if (comp.reviews.length === 0) {
+      await prisma.review.createMany({
+        data: [
+          {
+            companyId: comp.id,
+            authorName: "Anouk van der Meer",
+            rating: 5,
+            comment: "Fantastische service en vakkundige communicatie via het marktplein portaal!",
+          },
+          {
+            companyId: comp.id,
+            authorName: "Mark & Laura",
+            rating: 5,
+            comment: "De samenwerkingsbundel sloot naadloos aan bij onze verwachtingen. Absolute aanrader!",
+          }
+        ]
+      });
+    }
+  }
+}
+
 export async function ensureSeedData() {
   const count = await prisma.company.count();
   if (count > 0) {
-    return { count, message: "Database already contains companies." };
+    await enrichExistingCompanies();
+    return { count, message: "Database already contains companies; enriched with slug, hours, reviews." };
   }
 
   // Create a default system / demo user for companies
@@ -166,7 +318,6 @@ export async function ensureSeedData() {
   for (let i = 0; i < SAMPLE_COMPANIES.length; i++) {
     const sc = SAMPLE_COMPANIES[i];
 
-    // Each company needs a unique user relation
     let user = await prisma.user.findFirst({
       where: { email: `partner-${i + 1}@antoniuscore.nl` }
     });
@@ -183,12 +334,20 @@ export async function ensureSeedData() {
     const company = await prisma.company.create({
       data: {
         userId: user.id,
+        slug: sc.slug,
         name: sc.name,
         description: sc.description,
         logoUrl: sc.logoUrl,
+        websiteUrl: sc.websiteUrl,
+        city: sc.city,
+        address: sc.address,
+        latitude: sc.latitude,
+        longitude: sc.longitude,
+        serviceRadiusKm: sc.serviceRadiusKm,
+        availableStaff: sc.availableStaff,
+        clientCapacityPerProduct: sc.clientCapacityPerProduct,
         primarySector: sc.primarySector,
         openForSectors: sc.openForSectors,
-        address: sc.address,
         kvkNumber: sc.kvkNumber,
         vatNumber: sc.vatNumber,
         products: {
@@ -198,6 +357,23 @@ export async function ensureSeedData() {
             description: p.description,
             isTop5: p.isTop5
           }))
+        },
+        openingHours: {
+          create: [
+            { dayOfWeek: 1, openTime: "08:30", closeTime: "18:00", isClosed: false },
+            { dayOfWeek: 2, openTime: "08:30", closeTime: "18:00", isClosed: false },
+            { dayOfWeek: 3, openTime: "08:30", closeTime: "18:00", isClosed: false },
+            { dayOfWeek: 4, openTime: "08:30", closeTime: "20:00", isClosed: false },
+            { dayOfWeek: 5, openTime: "08:30", closeTime: "20:00", isClosed: false },
+            { dayOfWeek: 6, openTime: "09:00", closeTime: "17:00", isClosed: false },
+            { dayOfWeek: 0, openTime: "11:00", closeTime: "16:00", isClosed: sc.primarySector === SectorType.BOUW_RENOVATIE },
+          ]
+        },
+        reviews: {
+          create: [
+            { authorName: "Lotte de Boer", rating: 5, comment: "Topkwaliteit en vlot geregeld via het AntoniusCore portaal!" },
+            { authorName: "Klaas Visser", rating: 5, comment: "Professionele partij met heldere afspraken." }
+          ]
         }
       },
       include: {
@@ -220,7 +396,7 @@ export async function ensureSeedData() {
 
   // 1. Droombruiloft Bundel
   if (weddingStyling && weddingPhoto) {
-    const bundle1 = await prisma.bundle.create({
+    await prisma.bundle.create({
       data: {
         title: "Droombruiloft Totaalpakket (Styling & Fotografie)",
         description: "De perfecte synergie voor uw huwelijksdag: complete fotoreportage gecombineerd met luxueuze ceremoniële styling.",
@@ -246,7 +422,7 @@ export async function ensureSeedData() {
 
   // 2. Festival & Feest Bundel
   if (eventSound && eventStyling) {
-    const bundle2 = await prisma.bundle.create({
+    await prisma.bundle.create({
       data: {
         title: "All-in-One Feest & Festival Sensatie",
         description: "DJ Booth, Moving Head lichtshow, verlichte LED dansvloer en retro photobooth voor een onvergetelijke avond.",
@@ -273,7 +449,7 @@ export async function ensureSeedData() {
 
   // 3. Duurzaam Wonen Renovatie Bundel
   if (builder && ecoHeat) {
-    const bundle3 = await prisma.bundle.create({
+    await prisma.bundle.create({
       data: {
         title: "Compleet Duurzaam & Energieneutraal Woningpakket",
         description: "Gecombineerde installatie van hybride warmtepomp, vloerverwarming én kunststof isolatiekozijnen.",
@@ -299,7 +475,7 @@ export async function ensureSeedData() {
 
   // 4. Zakelijk Event & Catering Bundel
   if (corporateBrand && catering) {
-    const bundle4 = await prisma.bundle.create({
+    await prisma.bundle.create({
       data: {
         title: "Corporate Kick-off & Italiaans Walking Dinner",
         description: "Versterk uw merk met een modulaire beursstand en verwen zakenrelaties met een 5-gangen live pasta buffet.",
@@ -325,7 +501,7 @@ export async function ensureSeedData() {
 
   // 5. Bruiloft Borrel & Bar Bundel
   if (weddingStyling && catering) {
-    const bundle5 = await prisma.bundle.create({
+    await prisma.bundle.create({
       data: {
         title: "Romantische Receptie & Champagne Bar",
         description: "Styling van receptietafels gecombineerd met antipasti grazing table en mobiele espressobar.",

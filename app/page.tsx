@@ -8,11 +8,8 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const session = await getServerSession();
 
-  // If database has no companies, populate with realistic initial marketplace seed data
-  const companyCount = await prisma.company.count();
-  if (companyCount === 0) {
-    await ensureSeedData();
-  }
+  // Populate or enrich existing database records with slugs, opening hours, and reviews
+  await ensureSeedData();
 
   // Haal alleen bedrijven op uit de database die actieve producten beschikbaar hebben
   const [companiesWithProducts, allBundles] = await Promise.all([
@@ -26,6 +23,9 @@ export default async function HomePage() {
         products: {
           orderBy: [{ isTop5: "desc" }, { createdAt: "asc" }],
         },
+        openingHours: {
+          orderBy: { dayOfWeek: "asc" },
+        },
         bundles: {
           include: {
             bundle: {
@@ -36,6 +36,7 @@ export default async function HomePage() {
                       select: {
                         id: true,
                         name: true,
+                        slug: true,
                         primarySector: true,
                       },
                     },
@@ -67,6 +68,7 @@ export default async function HomePage() {
               select: {
                 id: true,
                 name: true,
+                slug: true,
                 primarySector: true,
               },
             },
