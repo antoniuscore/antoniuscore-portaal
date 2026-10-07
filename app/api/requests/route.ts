@@ -5,22 +5,46 @@ import { SectorType } from "@prisma/client";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customerName, customerEmail, sector, companyId } = body;
+    const { customerName, customerEmail, sector, companyId, companyIds, notes, items } = body;
 
-    if (!customerName || !customerEmail || !sector) {
-      return NextResponse.json({ error: "Naam, e-mail en sector zijn verplicht." }, { status: 400 });
+    if (!customerName || !customerEmail) {
+      return NextResponse.json({ error: "Naam en e-mailadres zijn verplicht." }, { status: 400 });
     }
+
+    // Determine sector: fallback to ZAKELIJK_CORPORATE or provided sector
+    const chosenSector = (sector && Object.values(SectorType).includes(sector))
+      ? (sector as SectorType)
+      : SectorType.ZAKELIJK_CORPORATE;
+
+    // Collect distinct company IDs
+    const targetCompanyIds: string[] = Array.from(
+      new Set(
+        [
+          ...(Array.isArray(companyIds) ? companyIds : []),
+          ...(companyId ? [companyId] : [])
+        ].filter(Boolean)
+      )
+    );
 
     const customRequest = await prisma.customRequest.create({
       data: {
         customerName,
         customerEmail,
-        sector: sector as SectorType,
-        companies: companyId
+        sector: chosenSector,
+        companies: targetCompanyIds.length > 0
           ? {
-              create: [{ companyId }]
+              create: targetCompanyIds.map(id => ({ companyId: id }))
             }
           : undefined
+      },
+      include: {
+        companies: {
+          include: {
+            company: {
+              select: { id: true, name: true }
+            }
+          }
+        }
       }
     });
 

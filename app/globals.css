@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #e4c158;
+  --sand-dark: #cca440;
+  --sand-light: #edd378;
+  --sand-path: #cfa844;
+  --wood-dark: #4a2810;
+  --wood-mid: #7c481f;
+  --wood-light: #ba793a;
+  --parchment: #fff4d4;
+  --foreground: #2d1808;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #e4c158;
+  color: #2d1808;
+}
+
+/* Stardew Valley Wooden Plaque / Pixel Borders */
+.pixel-box-wood {
+  background-color: #edd378;
+  border: 4px solid #4a2810;
+  box-shadow: 
+    inset -3px -3px 0px 0px #ba793a,
+    inset 3px 3px 0px 0px #fff4d4,
+    3px 3px 0px 0px rgba(0, 0, 0, 0.35);
+}
+
+.pixel-box-parchment {
+  background-color: #fff9ec;
+  border: 4px solid #5a3111;
+  box-shadow: 
+    inset -3px -3px 0px 0px #d9ba82,
+    inset 3px 3px 0px 0px #ffffff,
+    4px 5px 0px 0px rgba(74, 40, 16, 0.4);
+}
+
+.pixel-btn-red {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: 3px solid #450a0a;
+  box-shadow: 
+    inset -3px -3px 0px 0px #991b1b,
+    inset 3px 3px 0px 0px #f87171,
+    3px 3px 0px 0px rgba(0,0,0,0.45);
+}
+.pixel-btn-red:hover {
+  background-color: #ef4444;
+  transform: translateY(-2px);
+  box-shadow: 
+    inset -3px -3px 0px 0px #b91c1c,
+    inset 3px 3px 0px 0px #fca5a5,
+    4px 5px 0px 0px rgba(0,0,0,0.45);
+}
+.pixel-btn-red:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 3px 3px 0px 0px #991b1b,
+    1px 1px 0px 0px rgba(0,0,0,0.45);
+}
+
+.pixel-btn-wood {
+  background-color: #8a4b1f;
+  color: #fffbf2;
+  border: 3px solid #3b1d09;
+  box-shadow: 
+    inset -2px -2px 0px 0px #522709,
+    inset 2px 2px 0px 0px #c57b42,
+    2px 3px 0px 0px rgba(0,0,0,0.35);
+}
+.pixel-btn-wood:hover {
+  background-color: #9d5624;
+  transform: translateY(-1px);
+}
+.pixel-btn-wood:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 2px 2px 0px 0px #522709,
+    1px 1px 0px 0px rgba(0,0,0,0.35);
+}
+
+.pixel-btn-gold {
+  background-color: #d97706;
+  color: #ffffff;
+  border: 3px solid #78350f;
+  box-shadow: 
+    inset -2px -2px 0px 0px #92400e,
+    inset 2px 2px 0px 0px #fcd34d,
+    2px 3px 0px 0px rgba(0,0,0,0.35);
+}
+.pixel-btn-gold:hover {
+  background-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+/* Desert Sand & Cobblestone Tile Pattern */
+.bg-desert-market {
+  background-color: #e4c158;
+  background-image: 
+    radial-gradient(#cca440 18%, transparent 19%),
+    radial-gradient(#edd378 18%, transparent 19%);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+/* Cobblestone Market Square Ground */
+.market-cobblestone {
+  background-color: #d9b85c;
+  background-image: 
+    linear-gradient(rgba(100, 70, 20, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 70, 20, 0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Walking character bobbing animation */
+@keyframes walkBob {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-walk-bob {
+  animation: walkBob 0.5s ease-in-out infinite;
+}
+
+/* Little speech bubble pop */
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bubble-float {
+  animation: bubbleFloat 2s ease-in-out infinite;
 }
