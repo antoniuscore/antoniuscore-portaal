@@ -337,6 +337,13 @@ export default function BeheerClient({
 
           {/* Rechts: Bekijk Kraampje & Opslaan */}
           <div className="flex items-center gap-2">
+            <Link
+              href="/beheer/projecten"
+              className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold hover:scale-105 transition flex items-center gap-1"
+            >
+              <span>💬 Projecten & Chat</span>
+            </Link>
+
             {initialCompany.slug && (
               <Link
                 href={`/bedrijf/${initialCompany.slug}`}
@@ -429,6 +436,13 @@ export default function BeheerClient({
           >
             5. Aanbevolen Partners ({recommendedCompanies.length})
           </button>
+
+          <Link
+            href="/beheer/projecten"
+            className="px-4 py-2 rounded text-xs font-black uppercase tracking-wider transition cursor-pointer border bg-emerald-100 text-emerald-900 border-emerald-500 hover:bg-emerald-200 flex items-center gap-1 shadow-xs"
+          >
+            <span>💬 6. Projecten & Chat</span>
+          </Link>
         </div>
 
         {/* TAB 1: BEDRIJFSPROFIEL & MARKTKRAAM */}

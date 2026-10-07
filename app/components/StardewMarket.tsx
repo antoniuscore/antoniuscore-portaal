@@ -120,6 +120,7 @@ const TRANSLATIONS: Record<
     combinedRequest: string;
     sendInquiry: string;
     emptyCart: string;
+    feedbackBtn: string;
   }
 > = {
   NL: {
@@ -146,6 +147,7 @@ const TRANSLATIONS: Record<
     combinedRequest: "GEOFROTEERDE AANVRAAG",
     sendInquiry: "Verstuur Gecombineerde Aanvraag",
     emptyCart: "Uw mandje is nog leeg.",
+    feedbackBtn: "💬 Feedback & Suggesties",
   },
   EN: {
     loginBtn: "Business Login",
@@ -171,6 +173,7 @@ const TRANSLATIONS: Record<
     combinedRequest: "COMBINED INQUIRY",
     sendInquiry: "Send Combined Inquiry",
     emptyCart: "Your cart is currently empty.",
+    feedbackBtn: "💬 Feedback & Suggestions",
   },
   TI: {
     loginBtn: "ናይ ንግዲ ምእታው",
@@ -196,6 +199,46 @@ const TRANSLATIONS: Record<
     combinedRequest: "ዝተወሃሃደ ጠለብ",
     sendInquiry: "ዝተወሃሃደ ሕቶ ስደድ",
     emptyCart: "ጋሪኻ ጥራይ እዩ ዘሎ።",
+    feedbackBtn: "💬 ርእይቶን ሓሳብን",
+  },
+};
+
+export const SECTOR_TRANSLATIONS: Record<LanguageCode, Record<SectorType, string>> = {
+  NL: {
+    BRUILOFT: "Bruiloft",
+    EVENEMENTEN_FEEST: "Feest & Events",
+    BOUW_RENOVATIE: "Bouw & Renovatie",
+    ZAKELIJK_CORPORATE: "Zakelijk",
+    CATERING_HORECA: "Catering",
+    MARKETING_MEDIA_FOTOGRAFIE: "Media & Foto",
+    AUTOMOTIVE_LOGISTIEK: "Vervoer",
+    BEAUTY_LIFESTYLE: "Beauty",
+    ONDERWIJS_WORKSHOPS: "Onderwijs",
+    KUNST_ENTERTAINMENT: "Kunst & Acts",
+  },
+  EN: {
+    BRUILOFT: "Weddings",
+    EVENEMENTEN_FEEST: "Events & Party",
+    BOUW_RENOVATIE: "Construction",
+    ZAKELIJK_CORPORATE: "Corporate",
+    CATERING_HORECA: "Catering",
+    MARKETING_MEDIA_FOTOGRAFIE: "Media & Photo",
+    AUTOMOTIVE_LOGISTIEK: "Transport",
+    BEAUTY_LIFESTYLE: "Beauty",
+    ONDERWIJS_WORKSHOPS: "Education",
+    KUNST_ENTERTAINMENT: "Arts & Acts",
+  },
+  TI: {
+    BRUILOFT: "መርዓ",
+    EVENEMENTEN_FEEST: "ጽምብላት",
+    BOUW_RENOVATIE: "ህንጻ",
+    ZAKELIJK_CORPORATE: "ንግዲ",
+    CATERING_HORECA: "ምግቢ",
+    MARKETING_MEDIA_FOTOGRAFIE: "ሚድያን ፎቶን",
+    AUTOMOTIVE_LOGISTIEK: "መጓዓዝያ",
+    BEAUTY_LIFESTYLE: "ጽባቐ",
+    ONDERWIJS_WORKSHOPS: "ትምህርቲ",
+    KUNST_ENTERTAINMENT: "ስነ-ጥበብ",
   },
 };
 
@@ -352,6 +395,77 @@ export default function StardewMarket({
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [hoveredCompany, setHoveredCompany] = useState<CompanyWithMarketData | null>(null);
   const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(null);
+
+  // Feedback Modal State (contact@antoniuscore.com)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState<boolean>(false);
+  const [feedbackName, setFeedbackName] = useState<string>("");
+  const [feedbackEmail, setFeedbackEmail] = useState<string>("");
+  const [feedbackCategory, setFeedbackCategory] = useState<string>("Suggestie marktplein");
+  const [feedbackMessage, setFeedbackMessage] = useState<string>("");
+  const [feedbackSending, setFeedbackSending] = useState<boolean>(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("antoniuscore_cart");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setCart(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load cart from localStorage", e);
+    }
+  }, []);
+
+  const saveCartToStorage = (newCart: CartItem[]) => {
+    setCart(newCart);
+    try {
+      localStorage.setItem("antoniuscore_cart", JSON.stringify(newCart));
+    } catch (e) {
+      console.warn("Could not save cart to localStorage", e);
+    }
+  };
+
+  // Send feedback to /api/feedback
+  const handleSendFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackMessage.trim()) return;
+
+    setFeedbackSending(true);
+    setFeedbackError(null);
+
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: feedbackName,
+          email: feedbackEmail,
+          category: feedbackCategory,
+          message: feedbackMessage,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Fout bij verzenden van feedback.");
+      }
+
+      setFeedbackSuccess(
+        data.message ||
+          "Hartelijk dank! Uw feedback is rechtstreeks verzonden naar contact@antoniuscore.com."
+      );
+      setFeedbackMessage("");
+    } catch (err: any) {
+      setFeedbackError(err.message || "Er is een technische fout opgetreden.");
+    } finally {
+      setFeedbackSending(false);
+    }
+  };
 
   // Combined Request Modal
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -544,11 +658,13 @@ export default function StardewMarket({
   // Cart operations
   const addToCart = (e: React.MouseEvent, item: CartItem) => {
     e.stopPropagation();
-    setCart((prev) => [...prev, item]);
+    const updated = [...cart, item];
+    saveCartToStorage(updated);
   };
 
   const removeFromCart = (index: number) => {
-    setCart((prev) => prev.filter((_, idx) => idx !== index));
+    const updated = cart.filter((_, idx) => idx !== index);
+    saveCartToStorage(updated);
   };
 
   const cartTotal = useMemo(() => {
@@ -732,7 +848,7 @@ export default function StardewMarket({
               </span>
             </div>
 
-            {/* Randomize Knop & Infinite Scroll Toggle */}
+            {/* Randomize Knop, Infinite Scroll Toggle & Feedback Knop */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setShuffleSalt((prev) => prev + 1)}
@@ -753,6 +869,14 @@ export default function StardewMarket({
                 }`}
               >
                 {isInfiniteScroll ? t.infiniteScrollOn : t.infiniteScrollOff}
+              </button>
+
+              <button
+                onClick={() => setIsFeedbackOpen(true)}
+                className="pixel-btn-gold px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold hover:brightness-105 transition cursor-pointer flex items-center gap-1"
+                title="Stuur uw suggesties direct naar contact@antoniuscore.com"
+              >
+                {t.feedbackBtn}
               </button>
             </div>
           </div>
@@ -796,7 +920,7 @@ export default function StardewMarket({
                       style={{ backgroundColor: meta.roofColor1 }}
                     />
                     <span>
-                      {meta.label} ({count})
+                      {SECTOR_TRANSLATIONS[lang]?.[st] || meta.label} ({count})
                     </span>
                   </button>
                 );
@@ -924,13 +1048,20 @@ export default function StardewMarket({
             </button>
           </div>
         ) : (
-          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12 sm:gap-x-10 sm:gap-y-16 justify-items-center py-6">
+          <div className="relative z-10 flex flex-wrap justify-center items-start gap-x-8 sm:gap-x-12 gap-y-12 sm:gap-y-16 py-8 px-2 max-w-7xl mx-auto">
             {displayedStalls.map((company, index) => {
               const theme = SECTOR_THEMES[company.primarySector] || SECTOR_THEMES.ZAKELIJK_CORPORATE;
               const isOpen = checkIsOpenNow(company);
               const key = (company as any).instanceKey || `${company.id}-${index}`;
               const offsetX = (company as any).organicOffsetX || 0;
               const offsetY = (company as any).organicOffsetY || 0;
+
+              // Pseudo-willekeurige organische spreiding & lichte rotatie per kraampje
+              const itemSeed = stringToSeed(`${company.id}-${activeSeed}-${index}`);
+              const organicScatterX = Math.round((seededRandom(itemSeed) - 0.5) * 54);
+              const organicScatterY = Math.round((seededRandom(itemSeed + 1) - 0.5) * 36);
+              const organicTilt = ((seededRandom(itemSeed + 2) - 0.5) * 2.8).toFixed(1);
+              const organicStagger = Math.round(seededRandom(itemSeed + 3) * 24);
 
               // Bedrijfstype voor op de houten toonbank (bijv. Fotograaf, Kapper, Aannemer)
               const displayBusinessType =
@@ -962,9 +1093,10 @@ export default function StardewMarket({
                   onMouseEnter={(e) => handleMouseEnterStall(company, e)}
                   onMouseLeave={handleMouseLeaveStall}
                   style={{
-                    transform: `translate(${offsetX}px, ${offsetY}px)`,
+                    transform: `translate(${organicScatterX + offsetX}px, ${organicScatterY + offsetY}px) rotate(${organicTilt}deg)`,
+                    marginTop: `${organicStagger}px`,
                   }}
-                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-44"
+                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-44 shrink-0"
                 >
                   {/* BOVEN HET KRAAMPJE: Volledige Bedrijfsnaam ALTIJD GOED LEESBAAR (geen afkapping / no truncate) */}
                   <div className="w-full text-center font-bold text-[11px] sm:text-xs text-[#2d1808] leading-tight mb-1.5 px-2 py-1 bg-[#fff8e7] rounded border-2 border-[#4a2810] shadow-sm whitespace-normal break-words min-h-[34px] flex items-center justify-center">
@@ -996,9 +1128,9 @@ export default function StardewMarket({
                     </div>
 
                     {/* Houten Toonbank / Basis van het Kraampje */}
-                    <div className="w-full h-10 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md p-1 flex flex-col items-center justify-between">
-                      {/* OP DE VOORKANT: HET BEDRIJFSTYPE (Plaatsnaam verwijderd!) */}
-                      <div className="w-full text-center text-[9px] sm:text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate border border-[#78350f]">
+                    <div className="w-full h-11 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md px-1 py-1 flex flex-col items-center justify-between">
+                      {/* OP DE VOORKANT: HET BEDRIJFSTYPE (Verhoogde positie, niet meer afgesneden!) */}
+                      <div className="w-full text-center text-[9px] sm:text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate border border-[#78350f] -translate-y-1 shadow-xs">
                         {displayBusinessType}
                       </div>
 
@@ -1234,6 +1366,16 @@ export default function StardewMarket({
                     <span>€{cartTotal.toLocaleString("nl-NL")}</span>
                   </div>
 
+                  {/* Knop naar Uitgebreide Meerstaps Winkelmand & Planning */}
+                  <div className="pt-2">
+                    <Link
+                      href="/winkelmand"
+                      className="pixel-btn-wood w-full py-2.5 rounded text-xs font-black uppercase tracking-wider block text-center shadow-md hover:scale-101 transition border border-[#7c481f]"
+                    >
+                      📅 Naar Meerstaps Winkelmand & Planning →
+                    </Link>
+                  </div>
+
                   {/* Aanvraagformulier */}
                   {submitSuccess ? (
                     <div className="p-4 rounded bg-emerald-100 border border-emerald-500 text-emerald-900 text-xs font-bold text-center space-y-1">
@@ -1302,6 +1444,139 @@ export default function StardewMarket({
             <div className="pt-4 border-t border-[#7c481f]/30 text-[10px] text-[#7c481f] text-center">
               AntoniusCore B2B2C Marktplein • Vrijblijvende gecombineerde aanvragen.
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Floating Pixel-Art Feedback Knop */}
+      <button
+        onClick={() => setIsFeedbackOpen(true)}
+        className="fixed bottom-4 right-4 z-40 pixel-btn-wood px-3.5 py-2 rounded-lg text-xs font-black shadow-xl hover:scale-105 transition flex items-center gap-1.5 cursor-pointer border-2 border-[#fff4d4]"
+        title="Verstuur feedback of suggesties direct naar contact@antoniuscore.com"
+      >
+        <span>💬 Feedback</span>
+      </button>
+
+      {/* 8. Feedback Modal (contact@antoniuscore.com) */}
+      {isFeedbackOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md pixel-box-parchment p-6 rounded-lg shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b-2 border-[#7c481f] pb-2">
+              <h3 className="font-mono font-black text-sm uppercase text-[#3b1d09] flex items-center gap-1.5">
+                <span>💬 Feedback & Suggesties</span>
+              </h3>
+              <button
+                onClick={() => {
+                  setIsFeedbackOpen(false);
+                  setFeedbackSuccess(null);
+                }}
+                className="text-[#7c481f] hover:text-black font-black text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#5c3011]">
+              Uw feedback en ideeën worden direct verstuurd naar{" "}
+              <strong className="text-[#3b1d09]">contact@antoniuscore.com</strong> om het platform en het marktplein continu te verbeteren.
+            </p>
+
+            {feedbackSuccess ? (
+              <div className="p-4 bg-emerald-100 border border-emerald-500 rounded text-emerald-900 text-xs font-bold text-center space-y-3">
+                <p>{feedbackSuccess}</p>
+                <button
+                  onClick={() => {
+                    setIsFeedbackOpen(false);
+                    setFeedbackSuccess(null);
+                  }}
+                  className="pixel-btn-wood px-4 py-1.5 rounded text-xs font-bold"
+                >
+                  Sluiten
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSendFeedback} className="space-y-3 text-xs">
+                {feedbackError && (
+                  <div className="p-2 bg-rose-100 border border-rose-500 rounded text-rose-900 text-xs font-bold">
+                    {feedbackError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-bold text-[#4a2810] mb-1">
+                    Uw Naam (optioneel)
+                  </label>
+                  <input
+                    type="text"
+                    value={feedbackName}
+                    onChange={(e) => setFeedbackName(e.target.value)}
+                    placeholder="bijv. Jan Jansen"
+                    className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#4a2810] mb-1">
+                    E-mailadres (optioneel voor reactie)
+                  </label>
+                  <input
+                    type="email"
+                    value={feedbackEmail}
+                    onChange={(e) => setFeedbackEmail(e.target.value)}
+                    placeholder="jan@voorbeeld.nl"
+                    className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#4a2810] mb-1">
+                    Categorie
+                  </label>
+                  <select
+                    value={feedbackCategory}
+                    onChange={(e) => setFeedbackCategory(e.target.value)}
+                    className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs font-bold focus:outline-none"
+                  >
+                    <option value="Suggestie marktplein">💡 Suggestie marktplein & beleving</option>
+                    <option value="Foutmelding of bug">🐞 Fout of bug melden</option>
+                    <option value="Bedrijf toevoegen">🏪 Bedrijf toevoegen / registreren</option>
+                    <option value="Samenwerking of synergie">🤝 Samenwerking of synergie</option>
+                    <option value="Overig">✉️ Overig</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#4a2810] mb-1">
+                    Uw Bericht of Verbeterpunt *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={feedbackMessage}
+                    onChange={(e) => setFeedbackMessage(e.target.value)}
+                    placeholder="Laat ons weten wat we kunnen verbeteren of toevoegen..."
+                    className="w-full bg-[#fff4d4] border border-[#7c481f] rounded px-3 py-1.5 text-xs focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#7c481f]/30">
+                  <button
+                    type="button"
+                    onClick={() => setIsFeedbackOpen(false)}
+                    className="px-3 py-1.5 rounded text-xs font-bold text-[#4a2810] hover:bg-[#edd378]"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={feedbackSending}
+                    className="pixel-btn-red px-5 py-2 rounded text-xs font-black uppercase tracking-wider disabled:opacity-50 cursor-pointer shadow-md"
+                  >
+                    {feedbackSending ? "Verzenden..." : "Feedback Verzenden"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

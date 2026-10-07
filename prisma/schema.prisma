@@ -117,6 +117,9 @@ model Company {
   products                  Product[]
   bundles                   BundleCompany[]
   customRequests            CustomRequestCompany[]
+  projectItems              ProjectItem[]
+  sentChatMessages          ChatMessage[]          @relation("SentCompany")
+  receivedChatMessages      ChatMessage[]          @relation("RecipientCompany")
   createdAt                 DateTime               @default(now())
 }
 
@@ -143,16 +146,19 @@ model Review {
 }
 
 model Product {
-  id          String       @id @default(cuid())
-  companyId   String
-  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  price       Float
-  imageUrl    String?
-  isTop5      Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  bundleItems BundleItem[]
+  id                 String        @id @default(cuid())
+  companyId          String
+  company            Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name               String
+  description        String?
+  price              Float
+  imageUrl           String?
+  isTop5             Boolean       @default(false)
+  staffRequiredBase  Int           @default(1)
+  minPeoplePerStaff  Int           @default(25)
+  createdAt          DateTime      @default(now())
+  bundleItems        BundleItem[]
+  projectItems       ProjectItem[]
 }
 
 model Bundle {
@@ -203,3 +209,60 @@ model CustomRequestCompany {
 
   @@id([requestId, companyId])
 }
+
+enum ProjectStatus {
+  AANGEVRAAGD
+  IN_BEHANDELING
+  GEACCEPTEERD
+  AFGEROND
+  GEANNULEERD
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  title         String
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  eventDate     DateTime?
+  eventTimeSlot String?
+  eventLocation String?
+  targetGuests  Int?          @default(50)
+  totalPrice    Float         @default(0)
+  status        ProjectStatus @default(AANGEVRAAGD)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  items         ProjectItem[]
+  chatMessages  ChatMessage[]
+}
+
+model ProjectItem {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  quantity    Int      @default(1)
+  guestCount  Int?     @default(1)
+  staffNeeded Int      @default(1)
+  price       Float
+  customNotes String?
+  createdAt   DateTime @default(now())
+}
+
+model ChatMessage {
+  id                 String   @id @default(cuid())
+  projectId          String
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderCompanyId    String?
+  senderCompany      Company? @relation("SentCompany", fields: [senderCompanyId], references: [id], onDelete: Cascade)
+  senderName         String
+  recipientCompanyId String?
+  recipientCompany   Company? @relation("RecipientCompany", fields: [recipientCompanyId], references: [id], onDelete: SetNull)
+  content            String
+  createdAt          DateTime @default(now())
+}
+
