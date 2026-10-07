@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { SectorType } from "@prisma/client";
 import { SECTOR_THEMES } from "@/app/components/StardewMarket";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSelector from "@/app/components/LanguageSelector";
 
 export interface CartStoredItem {
   id: string; // unique item id in cart or product id
@@ -45,6 +47,7 @@ interface WinkelmandClientProps {
 }
 
 export default function WinkelmandClient({ initialCompanies }: WinkelmandClientProps) {
+  const { t, lang } = useLanguage();
   // Current active step: 1 = Selectie, 2 = Bundelen/Personeel, 3 = Agenda/Tijdstip, 4 = Klant & Verzenden
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
@@ -310,25 +313,26 @@ export default function WinkelmandClient({ initialCompanies }: WinkelmandClientP
               href="/"
               className="px-3 py-1.5 rounded text-xs font-bold text-[#4a2810] hover:text-[#2d1808] bg-[#edd378] border border-[#7c481f] flex items-center gap-1 transition"
             >
-              ← Terug naar Marktplein
+              {t.backToMarket}
             </Link>
           </div>
 
           <div className="text-center">
             <h1 className="font-mono font-black text-sm sm:text-lg text-[#3b1d09]">
-              Winkelmand, Planning & Personeel
+              {t.cartPageTitle}
             </h1>
             <p className="text-[11px] text-[#7c481f]">
-              {cart.length} diensten geselecteerd bij {itemsByCompany.length} bedrijven
+              {cart.length} {t.cart} items • {itemsByCompany.length} bedrijven
             </p>
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSelector />
             <Link
               href="/beheer"
               className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold hover:scale-105 transition"
             >
-              Mijn Beheer
+              {t.beheerBtn}
             </Link>
           </div>
         </div>

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { SectorType } from "@prisma/client";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSelector from "@/app/components/LanguageSelector";
 
 interface Product {
   id: string;
@@ -104,6 +106,7 @@ export default function CompanyDetailClient({
   company,
   recommendedPartners,
 }: CompanyDetailProps) {
+  const { t, lang } = useLanguage();
   // Check if currently open
   const now = new Date();
   const currentDay = now.getDay();
@@ -210,29 +213,32 @@ export default function CompanyDetailClient({
 
   return (
     <div className="min-h-screen bg-[#dfbc53] text-[#2d1808] font-sans pb-16">
-      {/* 1. Header Navigation */}
+      {/* 1. Header Navigation met LanguageSelector */}
       <header className="bg-[#cfa844] border-b-4 border-[#4a2810] py-3 px-4 shadow-md sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <Link
             href="/"
             className="pixel-btn-wood px-3.5 py-1.5 rounded text-xs font-bold"
           >
-            ← Terug naar Marktplein
+            {t.backToMarket}
           </Link>
 
           <span className="font-mono font-black text-sm text-[#3b1d09] tracking-wider uppercase hidden sm:inline">
             AntoniusCore Bedrijfsprofiel
           </span>
 
-          <button
-            onClick={() => {
-              setSelectedProduct(null);
-              setIsContactOpen(true);
-            }}
-            className="pixel-btn-red px-4 py-1.5 rounded text-xs font-black uppercase tracking-wider"
-          >
-            Contact & Offerte
-          </button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSelector />
+            <button
+              onClick={() => {
+                setSelectedProduct(null);
+                setIsContactOpen(true);
+              }}
+              className="pixel-btn-red px-3 sm:px-4 py-1.5 rounded text-xs font-black uppercase tracking-wider"
+            >
+              {t.contactAndQuote}
+            </button>
+          </div>
         </div>
       </header>
 

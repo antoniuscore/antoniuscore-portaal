@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { SectorType } from "@prisma/client";
 import { SECTOR_THEMES } from "@/app/components/StardewMarket";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSelector from "@/app/components/LanguageSelector";
 
 export const STANDARD_BUSINESS_TYPES = [
   "Fotograaf",
@@ -115,6 +117,7 @@ export default function BeheerClient({
   userEmail,
   userName,
 }: BeheerClientProps) {
+  const { t, lang } = useLanguage();
   // Tabs: profiel | sectoren | openingstijden | catalogus | partners
   const [activeTab, setActiveTab] = useState<
     "profiel" | "sectoren" | "openingstijden" | "catalogus" | "partners"
@@ -321,36 +324,38 @@ export default function BeheerClient({
               href="/"
               className="px-3 py-1.5 rounded text-xs font-bold text-[#4a2810] hover:text-[#2d1808] bg-[#edd378] border border-[#7c481f] flex items-center gap-1 transition"
             >
-              ← Naar Marktplein
+              {t.backToMarket}
             </Link>
           </div>
 
           {/* Midden: Titel */}
           <div className="text-center">
             <h1 className="font-mono font-black text-sm sm:text-lg text-[#3b1d09] tracking-wide">
-              Mijn Profiel & Marktplein Beheer
+              {t.beheerTitle}
             </h1>
             <p className="text-[11px] text-[#7c481f]">
-              Ingelogd als <strong className="text-[#3b1d09]">{userName}</strong> ({userEmail})
+              {userName || userEmail}
             </p>
           </div>
 
-          {/* Rechts: Bekijk Kraampje & Opslaan */}
+          {/* Rechts: Taal, Bekijk Kraampje & Opslaan */}
           <div className="flex items-center gap-2">
+            <LanguageSelector />
+
             <Link
               href="/beheer/projecten"
               className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold hover:scale-105 transition flex items-center gap-1"
             >
-              <span>💬 Projecten & Chat</span>
+              <span>💬 {t.projectsAndChat}</span>
             </Link>
 
             {initialCompany.slug && (
               <Link
                 href={`/bedrijf/${initialCompany.slug}`}
                 target="_blank"
-                className="pixel-btn-gold px-3 py-1.5 rounded text-xs font-bold hover:scale-105 transition"
+                className="pixel-btn-gold px-3 py-1.5 rounded text-xs font-bold hover:scale-105 transition hidden sm:inline-flex"
               >
-                Bekijk Kraampje ↗
+                {t.viewStall}
               </Link>
             )}
 
@@ -359,7 +364,7 @@ export default function BeheerClient({
               disabled={saving}
               className="pixel-btn-red px-4 py-2 rounded text-xs font-black tracking-wider uppercase shadow-md disabled:opacity-50 cursor-pointer"
             >
-              {saving ? "Opslaan..." : "Opslaan"}
+              {saving ? t.saving : t.save}
             </button>
           </div>
         </div>

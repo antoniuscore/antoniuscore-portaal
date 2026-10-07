@@ -4,6 +4,15 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SectorType } from "@prisma/client";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSelector from "@/app/components/LanguageSelector";
+import {
+  PixelForestBorder,
+  PixelGrassTuft,
+  PixelBarrel,
+  PixelCrate,
+  PixelFlowerPot,
+} from "@/app/components/PixelFoliage";
 
 export interface ProductItem {
   id: string;
@@ -374,9 +383,9 @@ export default function StardewMarket({
 }) {
   const router = useRouter();
 
-  // Language State: NL | EN | TI
-  const [lang, setLang] = useState<LanguageCode>("NL");
-  const t = TRANSLATIONS[lang];
+  // Language State: NL | EN | TI (via shared global LanguageContext)
+  const { lang, setLang } = useLanguage();
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.NL;
 
   // Filters State
   const [selectedSector, setSelectedSector] = useState<SectorType | "ALL">("ALL");
@@ -779,41 +788,7 @@ export default function StardewMarket({
             {/* Rechts: Talen Selector & Mandje */}
             <div className="flex items-center gap-2 shrink-0">
               {/* Talen Selector (NL / EN / TI) */}
-              <div className="bg-[#b38827] border-2 border-[#4a2810] rounded p-0.5 flex items-center gap-0.5 text-[11px] font-black">
-                <button
-                  onClick={() => setLang("NL")}
-                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
-                    lang === "NL"
-                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
-                      : "text-[#fffbf2] hover:text-[#fcd34d]"
-                  }`}
-                  title="Nederlands"
-                >
-                  NL
-                </button>
-                <button
-                  onClick={() => setLang("EN")}
-                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
-                    lang === "EN"
-                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
-                      : "text-[#fffbf2] hover:text-[#fcd34d]"
-                  }`}
-                  title="English"
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => setLang("TI")}
-                  className={`px-1.5 py-0.5 rounded cursor-pointer transition ${
-                    lang === "TI"
-                      ? "bg-[#fff4d4] text-[#4a2810] shadow-xs"
-                      : "text-[#fffbf2] hover:text-[#fcd34d]"
-                  }`}
-                  title="ትግርኛ (Tigrinya)"
-                >
-                  TI
-                </button>
-              </div>
+              <LanguageSelector />
 
               {/* Winkelmand */}
               <button
@@ -848,7 +823,7 @@ export default function StardewMarket({
               </span>
             </div>
 
-            {/* Randomize Knop, Infinite Scroll Toggle & Feedback Knop */}
+            {/* Randomize Knop & Infinite Scroll Toggle */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setShuffleSalt((prev) => prev + 1)}
@@ -869,14 +844,6 @@ export default function StardewMarket({
                 }`}
               >
                 {isInfiniteScroll ? t.infiniteScrollOn : t.infiniteScrollOff}
-              </button>
-
-              <button
-                onClick={() => setIsFeedbackOpen(true)}
-                className="pixel-btn-gold px-2.5 py-1 rounded text-[11px] sm:text-xs font-bold hover:brightness-105 transition cursor-pointer flex items-center gap-1"
-                title="Stuur uw suggesties direct naar contact@antoniuscore.com"
-              >
-                {t.feedbackBtn}
               </button>
             </div>
           </div>
@@ -987,10 +954,42 @@ export default function StardewMarket({
         </div>
       </div>
 
-      {/* 4. Centrale 2D Marktplein Veld */}
-      <main className="flex-1 relative p-4 sm:p-8 max-w-7xl mx-auto w-full">
+      {/* 4. Centrale 2D Marktplein Veld met Pixel Bomen aan de zijkanten */}
+      <main className="flex-1 relative p-4 sm:p-8 max-w-7xl mx-auto w-full min-h-[700px]">
+        {/* Linker en Rechter Bosranden (Stardew Valley bomen, struiken, paddenstoelen en rotsen) */}
+        <PixelForestBorder side="left" />
+        <PixelForestBorder side="right" />
+
+        {/* Sporadische Stardew Graspolletjes op de Zandgrond */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+          {[
+            { x: 12, y: 8, s: 18 },
+            { x: 26, y: 14, s: 22 },
+            { x: 42, y: 6, s: 16 },
+            { x: 68, y: 10, s: 20 },
+            { x: 84, y: 16, s: 18 },
+            { x: 16, y: 38, s: 22 },
+            { x: 34, y: 46, s: 16 },
+            { x: 72, y: 40, s: 20 },
+            { x: 86, y: 52, s: 18 },
+            { x: 14, y: 72, s: 20 },
+            { x: 30, y: 84, s: 18 },
+            { x: 54, y: 76, s: 22 },
+            { x: 76, y: 82, s: 16 },
+            { x: 88, y: 88, s: 20 },
+          ].map((grass, idx) => (
+            <div
+              key={`grass-tuft-${idx}`}
+              className="absolute"
+              style={{ left: `${grass.x}%`, top: `${grass.y}%` }}
+            >
+              <PixelGrassTuft size={grass.s} />
+            </div>
+          ))}
+        </div>
+
         {/* Subtiel Marktplein Cobblestone Binnenplaats Achtergrond */}
-        <div className="absolute inset-2 sm:inset-6 market-cobblestone rounded-2xl pointer-events-none opacity-30 border border-[#7c481f]/20" />
+        <div className="absolute inset-4 sm:inset-10 market-cobblestone rounded-2xl pointer-events-none opacity-30 border border-[#7c481f]/20 z-0" />
 
         {/* Dynamische Live Bezoekers Poppetjes */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
@@ -1027,7 +1026,7 @@ export default function StardewMarket({
           ))}
         </div>
 
-        {/* Kraampjes Grid: Geen truncate op bedrijfsnaam, Bedrijfstype op de voorkant! */}
+        {/* Kraampjes Grid: Fysiek geworteld in de grond (geen zwevende kaartjes meer!) */}
         {displayedStalls.length === 0 ? (
           <div className="relative z-10 text-center py-24 space-y-3">
             <h3 className="font-mono font-black text-xl text-[#4a2810]">
@@ -1048,7 +1047,7 @@ export default function StardewMarket({
             </button>
           </div>
         ) : (
-          <div className="relative z-10 flex flex-wrap justify-center items-start gap-x-8 sm:gap-x-12 gap-y-12 sm:gap-y-16 py-8 px-2 max-w-7xl mx-auto">
+          <div className="relative z-10 flex flex-wrap justify-center items-start gap-x-10 sm:gap-x-14 gap-y-14 sm:gap-y-18 py-8 px-4 sm:px-8 max-w-7xl mx-auto">
             {displayedStalls.map((company, index) => {
               const theme = SECTOR_THEMES[company.primarySector] || SECTOR_THEMES.ZAKELIJK_CORPORATE;
               const isOpen = checkIsOpenNow(company);
@@ -1096,60 +1095,109 @@ export default function StardewMarket({
                     transform: `translate(${organicScatterX + offsetX}px, ${organicScatterY + offsetY}px) rotate(${organicTilt}deg)`,
                     marginTop: `${organicStagger}px`,
                   }}
-                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-36 sm:w-44 shrink-0"
+                  className="group cursor-pointer flex flex-col items-center relative transition-transform duration-200 hover:-translate-y-2 hover:z-30 w-40 sm:w-48 shrink-0"
                 >
-                  {/* BOVEN HET KRAAMPJE: Volledige Bedrijfsnaam ALTIJD GOED LEESBAAR (geen afkapping / no truncate) */}
-                  <div className="w-full text-center font-bold text-[11px] sm:text-xs text-[#2d1808] leading-tight mb-1.5 px-2 py-1 bg-[#fff8e7] rounded border-2 border-[#4a2810] shadow-sm whitespace-normal break-words min-h-[34px] flex items-center justify-center">
-                    {company.name}
+                  {/* Verticale Houten Draagbalken (Links en Rechts) die het hele kraampje fysiek dragen */}
+                  <div className="absolute left-1 sm:left-2 top-2 bottom-3 w-2 sm:w-2.5 bg-[#4a2810] border-r border-[#261205] rounded-t-xs z-10 shadow-xs" />
+                  <div className="absolute right-1 sm:right-2 top-2 bottom-3 w-2 sm:w-2.5 bg-[#4a2810] border-l border-[#261205] rounded-t-xs z-10 shadow-xs" />
+
+                  {/* Bovenste Dwarsbalk met IJzeren Ophanghaken */}
+                  <div className="w-[92%] h-2 bg-[#5c2e0b] border border-[#2b1204] rounded-xs shadow-xs relative z-10 flex justify-between px-3">
+                    <div className="w-1 h-2 bg-[#334155] -mb-1" />
+                    <div className="w-1 h-2 bg-[#334155] -mb-1" />
                   </div>
 
-                  {/* 2D PIXEL ART KRAAMPJE */}
-                  <div className="relative w-30 sm:w-34 flex flex-col items-center">
-                    {/* Luifel / Dakje: Sector Gekleurde Strepen / Hout */}
+                  {/* Houten Hangbord met Bedrijfsnaam (Geïntegreerd in de houten structuur met kettingen) */}
+                  <div className="relative z-10 w-full px-1.5 -mt-0.5 mb-1">
+                    <div className="w-full bg-[#3d1e08] border-2 border-[#200e03] rounded p-0.5 shadow-md">
+                      <div className="w-full bg-[#f6ebd0] border border-[#a16207] px-2 py-1 rounded text-center min-h-[34px] flex items-center justify-center">
+                        <span className="font-mono font-black text-[11px] sm:text-xs text-[#2b1305] leading-tight break-words">
+                          {company.name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2D PIXEL ART KRAAMPJE STRUCTUUR */}
+                  <div className="relative w-34 sm:w-40 flex flex-col items-center z-10">
+                    {/* Luifel / Dakje: Sector Gekleurde Strepen / Hout met Scalloped Valance */}
                     <div
-                      className={`w-full h-8 sm:h-9 rounded-t-md border-3 ${theme.borderCol} shadow-md overflow-hidden relative`}
+                      className={`w-full h-9 sm:h-10 rounded-t-md border-3 ${theme.borderCol} shadow-md overflow-hidden relative`}
                       style={{
                         backgroundImage: theme.isWood
                           ? `repeating-linear-gradient(90deg, ${theme.roofColor1}, ${theme.roofColor1} 10px, ${theme.roofColor2} 10px, ${theme.roofColor2} 20px)`
                           : `repeating-linear-gradient(90deg, ${theme.roofColor1}, ${theme.roofColor1} 11px, ${theme.roofColor2} 11px, ${theme.roofColor2} 22px)`,
                       }}
                     >
-                      {/* Golfjes onderaan de luifel */}
-                      <div className="absolute bottom-0 inset-x-0 h-1.5 bg-black/15 flex justify-between">
-                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                      {/* Golfjes / Scalloped zoom onderaan de luifel */}
+                      <div className="absolute bottom-0 inset-x-0 h-2 bg-black/20 flex justify-between px-0.5">
+                        <div className="w-2 h-2 rounded-full bg-black/25" />
+                        <div className="w-2 h-2 rounded-full bg-black/25" />
+                        <div className="w-2 h-2 rounded-full bg-black/25" />
+                        <div className="w-2 h-2 rounded-full bg-black/25" />
                       </div>
                     </div>
 
-                    {/* Kramer / Winkelier Sprite Achter Toonbank */}
-                    <div className="w-full h-5 bg-[#522709] border-x-3 border-[#3b1d09] flex items-center justify-center relative">
-                      <div className="w-4 h-4 rounded-full bg-[#fcd34d] border border-[#78350f] shadow-xs" />
+                    {/* Houten Achterwand, Schappen & Winkelier Sprite */}
+                    <div className="w-full h-7 bg-[#451f08] border-x-3 border-[#261205] flex items-center justify-between px-2.5 relative">
+                      {/* Linker schap met kleine potjes */}
+                      <div className="flex items-center gap-1 opacity-80">
+                        <div className="w-2 h-3 bg-amber-400/80 rounded-xs border border-amber-800" />
+                        <div className="w-1.5 h-2.5 bg-emerald-400/80 rounded-xs border border-emerald-800" />
+                      </div>
+
+                      {/* Winkelier Sprite achter toonbank */}
+                      <div className="relative flex flex-col items-center">
+                        <div className="w-3.5 h-1.5 bg-[#dc2626] rounded-t-xs" />
+                        <div className="w-4 h-4 rounded-full bg-[#fcd34d] border border-[#78350f] shadow-xs" />
+                      </div>
+
+                      {/* Rechter schap met potjes */}
+                      <div className="flex items-center gap-1 opacity-80">
+                        <div className="w-2 h-2.5 bg-indigo-400/80 rounded-xs border border-indigo-800" />
+                        <div className="w-1.5 h-3 bg-rose-400/80 rounded-xs border border-rose-800" />
+                      </div>
                     </div>
 
-                    {/* Houten Toonbank / Basis van het Kraampje */}
-                    <div className="w-full h-11 bg-[#ba793a] border-3 border-[#4a2810] rounded-b-md shadow-md px-1 py-1 flex flex-col items-center justify-between">
-                      {/* OP DE VOORKANT: HET BEDRIJFSTYPE (Verhoogde positie, niet meer afgesneden!) */}
-                      <div className="w-full text-center text-[9px] sm:text-[10px] font-black uppercase text-[#fff4d4] bg-[#4a2810] px-1 py-0.5 rounded tracking-wide truncate border border-[#78350f] -translate-y-1 shadow-xs">
+                    {/* Houten Toonbank / Balie met houtnerf */}
+                    <div className="w-full h-11 bg-[#a35e27] border-3 border-[#4a2810] rounded-b-xs shadow-md px-1.5 py-1 flex flex-col items-center justify-between relative">
+                      <div className="absolute top-5 inset-x-0 border-b border-[#5a2e0e]/50 pointer-events-none" />
+
+                      {/* OP DE VOORKANT: HET BEDRIJFSTYPE PLAQUE (Carved Wood) */}
+                      <div className="w-full text-center text-[9px] sm:text-[10px] font-black uppercase text-[#fff7ed] bg-[#351805] px-1 py-0.5 rounded tracking-wide truncate border border-[#b45309] -translate-y-1.5 shadow-sm">
                         {displayBusinessType}
                       </div>
 
                       {/* Status & Catalogus indicator */}
-                      <div className="w-full flex items-center justify-between px-1 text-[9px] font-bold">
-                        <span className="text-[#3b1d09]">
+                      <div className="w-full flex items-center justify-between px-1 text-[9px] font-bold z-10">
+                        <span className="text-[#3b1d09] font-mono">
                           {company.products.length} items
                         </span>
                         <span
-                          className={`w-2 h-2 rounded-full ${
-                            isOpen ? "bg-emerald-600 shadow-[0_0_5px_#16a34a]" : "bg-rose-600"
+                          className={`w-2.5 h-2.5 rounded-full border border-black/40 ${
+                            isOpen ? "bg-emerald-500 shadow-[0_0_6px_#22c55e]" : "bg-rose-600"
                           }`}
                           title={isOpen ? "Nu Geopend" : "Nu Gesloten"}
                         />
                       </div>
                     </div>
 
-                    {/* Grondschaduw */}
-                    <div className="w-24 h-2 bg-black/20 rounded-full mt-1 blur-2xs" />
+                    {/* Stevige Natuurstenen Vlonder Fundering (Platform dat in de aarde verankerd is!) */}
+                    <div className="w-38 sm:w-44 h-3 bg-[#64748b] border-2 border-[#334155] rounded-xs shadow-sm mt-0.5 flex justify-around items-center">
+                      <div className="w-px h-full bg-[#334155]" />
+                      <div className="w-px h-full bg-[#334155]" />
+                      <div className="w-px h-full bg-[#334155]" />
+                    </div>
+
+                    {/* Decoratieve Grond-prop naast het kraampje (Ton, Krat of Bloempot) */}
+                    <div className="absolute -bottom-1 -left-2.5 z-20 pointer-events-none">
+                      {index % 3 === 0 && <PixelBarrel size={18} />}
+                      {index % 3 === 1 && <PixelCrate size={16} />}
+                      {index % 3 === 2 && <PixelFlowerPot size={17} />}
+                    </div>
+
+                    {/* Diepe Pixel Contactschaduw op het Zand */}
+                    <div className="w-38 sm:w-44 h-3.5 bg-[#2d1808]/40 rounded-full blur-[1px] -mt-1.5 z-0" />
                   </div>
                 </div>
               );

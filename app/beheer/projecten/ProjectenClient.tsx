@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ProjectStatus, SectorType } from "@prisma/client";
 import { SECTOR_THEMES } from "@/app/components/StardewMarket";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSelector from "@/app/components/LanguageSelector";
 
 interface ProjectItemData {
   id: string;
@@ -71,6 +73,7 @@ export default function ProjectenClient({
   initialProjects,
   currentCompany,
 }: ProjectenClientProps) {
+  const { t, lang } = useLanguage();
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(
     initialProjects[0]?.id || ""
@@ -203,13 +206,13 @@ export default function ProjectenClient({
               href="/beheer"
               className="px-3 py-1.5 rounded text-xs font-bold text-[#4a2810] hover:text-[#2d1808] bg-[#edd378] border border-[#7c481f] flex items-center gap-1 transition"
             >
-              ← Terug naar Profiel & Beheer
+              {t.backToProfile}
             </Link>
           </div>
 
           <div className="text-center">
             <h1 className="font-mono font-black text-sm sm:text-lg text-[#3b1d09]">
-              Geaccepteerde Projecten & Gecombineerde Chat
+              {t.projectsAndChat}
             </h1>
             <p className="text-[11px] text-[#7c481f]">
               {currentCompany ? currentCompany.name : "Partner Beheer"} • Synergetische samenwerkingen
@@ -217,17 +220,18 @@ export default function ProjectenClient({
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSelector />
             <Link
               href="/winkelmand"
-              className="pixel-btn-gold px-3 py-1.5 rounded text-xs font-bold"
+              className="pixel-btn-gold px-3 py-1.5 rounded text-xs font-bold hidden sm:inline-flex"
             >
-              Winkelmand & Planning
+              {t.cart} & Planning
             </Link>
             <Link
               href="/"
               className="pixel-btn-wood px-3 py-1.5 rounded text-xs font-bold"
             >
-              Marktplein
+              {t.brandTitle}
             </Link>
           </div>
         </div>

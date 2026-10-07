@@ -18,6 +18,8 @@ const pixelFont = VT323({
   subsets: ["latin"],
 });
 
+import { LanguageProvider } from "@/app/context/LanguageContext";
+
 export const metadata: Metadata = {
   title: "AntoniusCore — Stardew Valley 2D Top-Down Marktplein",
   description: "Interactief 2D Top-Down Marktplein met kraampjes, wandelende dorpsbezoekers en bulk winkelmand.",
@@ -34,7 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${pixelFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#e4c158] text-[#2d1808]">
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );
